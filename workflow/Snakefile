@@ -11,6 +11,12 @@ include: "rules/merge_salmon.smk"
 rule salmon_quant_target:
     include:
         unpack(get_salmon_quant_target),
+    localrule: True
+    threads: 1
+    resources:
+        mem_mb=128,
+        runtime=2,
+        tmpdir="tmp",
     log:
         "logs/target/salmon_quant_target.log"
     benchmark:

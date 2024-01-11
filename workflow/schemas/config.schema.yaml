@@ -1,0 +1,44 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+
+genomes:
+  type: string
+  description: Path to the CSV file defining genome properties
+
+
+load_fair_genome_indexer:
+  type: boolean
+  description: Load (or not) the fair_genome_indexer pipeline
+
+
+samples:
+  type: string
+  description: Path to the CSV file defining samples and their corresponding fastq paths
+
+params:
+  type: object
+  salmon:
+    type: object
+    description: Optional parameters for Salmon
+    index:
+      type: string
+      description: Optional parameters for salmon index
+    quant:
+      type: string
+      description: Optional parameters for Salmon quant
+
+
+  fastp:
+    type: str
+    description: Optional parameters for Fastp
+
+  tximport:
+    type: str
+    description: Optional parameters for tximport
+
+required:
+  - samples

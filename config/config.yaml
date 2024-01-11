@@ -1,0 +1,22 @@
+samples: config/samples.csv
+
+# Optional parameters
+params:
+  # Optional parameters for fastp trimming and QC
+  fastp: ""
+  salmon:
+    # Optional parameters for genome indexation with Salmon
+    index: ""
+    # Optional parameters for salmon quantification
+    # One should always include bootstraping and Bulk RNASeq bias
+    quant: "--numBootstraps 100 --gcBias --seqBias --posBias"
+  # Optional parameters for tximport
+  tximport: "type='salmon', ignoreTxVersion=TRUE, ignoreAfterBar=TRUE"
+
+# Optional path to a genome.csv file
+genomes: "config/genome.csv"
+
+# Instenal use only, not described in documentation.
+# Deactivate import of fair_genome_indexer pipeline.
+# Requires the file `genome.csv` to be filled.
+# load_fair_genome_indexer: true

@@ -32,7 +32,7 @@ def read_tx2gene(path: str,
 
     And returns it as a DataFrame
     """
-    t2g = pandas.read_csv(
+    t2g: pandas.DataFrame = pandas.read_csv(
         path,
         sep="\t",
         index_col=None,
@@ -71,7 +71,7 @@ def read_salmon(path: str) -> pandas.DataFrame:
     This function reads a single salmon quant.sf or quant.genes.sf
     and returns it as a pandas DataFrame
     """
-    df = pandas.read_csv(
+    df: pandas.DataFrame = pandas.read_csv(
         path,
         sep="\t",
         index_col=0,
@@ -98,14 +98,14 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 
-merged_frame = None
+merged_frame: pandas.DataFrame | None = None
 
 for quant in snakemake.input["quant"]:
     logging.debug(f"Reading {quant}")
-    data = read_salmon(quant)
+    data: pandas.DataFrame = read_salmon(quant)
 
     logging.debug("Cleaning dataframe")
-    sample_id = basename(dirname(quant))
+    sample_id: str = basename(dirname(quant))
     if len(suffix := snakemake.params.get("suffix", "")) > 0:
         sample_id = sample_id[:-len(suffix)]
     if len(prefix := snakemake.params.get("prefix", "")) > 0:
