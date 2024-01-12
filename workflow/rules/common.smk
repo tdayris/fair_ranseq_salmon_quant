@@ -3,7 +3,8 @@ import pandas
 import snakemake
 import snakemake.utils
 
-from typing import Any, Dict, List, Optional, Union
+from collections import defaultdict
+from typing import Any
 
 snakemake.utils.min_version("7.29.0")
 
@@ -66,9 +67,11 @@ snakemake_wrappers_version: str = "v3.0.0"
 report: "../report/workflow.rst"
 
 
-release_list: List[str] = list(set(genomes.release.tolist()))
-build_list: List[str] = list(set(genomes.build.tolist()))
-species_list: List[str] = list(set(genomes.species.tolist()))
+release_list: list[str] = list(set(genomes.release.tolist()))
+build_list: list[str] = list(set(genomes.build.tolist()))
+species_list: list[str] = list(set(genomes.species.tolist()))
+datatype_list: list[str] = ["dna", "cdna"]
+stream_list: list[str] = ["1", "2"]
 
 
 wildcard_constraints:
@@ -76,6 +79,8 @@ wildcard_constraints:
     release=r"|".join(release_list),
     build=r"|".join(build_list),
     species=r"|".join(species_list),
+    datatype=r"|".join(datatype_list),
+    stream=r"|".join(stream_list),
 
 
 def get_sample_information(
@@ -95,7 +100,6 @@ def get_sample_information(
     if len(result) > 0:
         return next(iter(result.to_dict(orient="index").values()))
     return defaultdict(lambda: None)
-
 
 
 def get_reference_genome_data(
@@ -121,33 +125,63 @@ def get_reference_genome_data(
     return defaultdict(lambda: None)
 
 
-def get_salmon_quant_target(    wildcards: snakemake.io.Wildcards,
+def get_salmon_quant_reads_input(
+    wildcards: snakemake.io.Wildcards,
     samples: pandas.DataFrame = samples,
+    genomes: pandas.DataFrame = genomes,
     config: dict[str, Any] = config,
 ) -> dict[str, list[str]]:
     """
-    Return expected input files for Bowtie2 mapping, according to user-input,
+    Return expected input files for Salmon mapping, according to user-input,
     and snakemake-wrapper requirements
 
     Parameters:
     wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
     samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+    genomes   (pandas.DataFrame)      : Describe genome and index files paths
     config    (dict[str, Any])        : Configuration file
 
     Return (dict[str, list[str]]):
-    Dictionnary of all input files as required by Fastp's snakemake-wrapper
+    Dictionnary of all input files as required by Salmon's snakemake-wrapper
     """
+    species: str = str(wildcards.species)
+    release: str = str(wildcards.release)
+    build: str = str(wildcards.build)
     sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
     downstream_file: str | None = sample_data.get("downstream_file")
-    if downstream_file or not pandas.isna(downstream_file):
-        return {
-            "r1": f"tmp/fastp/trimmed/{wildcards.sample}.1.fastq",
-            "r1": f"tmp/fastp/trimmed/{wildcards.sample}.2.fastq",
-        }
-
-    return {
-        "r": f"tmp/fastp/trimmed/{wildcards.sample}.fastq",
+    salmon_index: list[str] | None = get_reference_genome_data(wildcards, genomes).get("salmon_index")
+    if not salmon_index:
+        salmon_index = multiext(
+            f"reference/{species}.{build}.{release}/salmon_index_{species}.{build}.{release}",
+            "complete_ref_lens.bin",
+            "ctable.bin",
+            "ctg_offsets.bin",
+            "duplicate_clusters.tsv",
+            "info.json",
+            "mphf.bin",
+            "pos.bin",
+            "pre_indexing.log",
+            "rank.bin",
+            "refAccumLengths.bin",
+            "ref_indexing.log",
+            "reflengths.bin",
+            "refseq.bin",
+            "seq.bin",
+            "versionInfo.json",
+        )
+    
+    results: dict[str, str | list[str]] = {
+        "index": ancient(salmon_index),
+        "gtf": ancient(f"resources/{species}.{build}.{release}.gtf"),
     }
+
+    if downstream_file or not pandas.isna(downstream_file):
+        results["r1"] = f"tmp/fastp/trimmed/{wildcards.sample}.1.fastq"
+        results["r2"] = f"tmp/fastp/trimmed/{wildcards.sample}.2.fastq"
+    else:
+        results["r"] = f"tmp/fastp/trimmed/{wildcards.sample}.fastq"
+
+    return results
 
 
 def get_fastp_trimming_input(
@@ -156,7 +190,7 @@ def get_fastp_trimming_input(
     config: dict[str, Any] = config,
 ) -> dict[str, list[str]]:
     """
-    Return expected input files for Bowtie2 mapping, according to user-input,
+    Return expected input files for Fastp mapping, according to user-input,
     and snakemake-wrapper requirements
 
     Parameters:
@@ -169,7 +203,7 @@ def get_fastp_trimming_input(
     """
     sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
     downstream_file: str | None = sample_data.get("downstream_file")
-    if downstream_file or not pandas.isna(downstream_file):
+    if downstream_file and not pandas.isna(downstream_file):
         return {
             "sample": [sample_data["upstream_file"], downstream_file],
         }
@@ -179,7 +213,184 @@ def get_fastp_trimming_input(
     }
 
 
-def get_rnaseq_salmon_quant_target(wildcards: snakemake.io.Wildcards,
+def get_aggregate_salmon_counts_input(
+    wildcards: snakemake.io.Wildcards,
+    samples: pandas.DataFrame = samples,
+    config: dict[str, Any] = config,
+) -> dict[str, list[str]]:
+    """
+    Return expected input files for Salmon quant aggregation script,
+    according to user-input, and snakemake-wrapper requirements
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+    config    (dict[str, Any])        : Configuration file
+
+    Return (dict[str, list[str]]):
+    Dictionnary of all input files as required by Salmon quant aggregation script
+    """
+    species: str = str(wildcards.species)
+    build: str = str(wildcards.build)
+    release: str = str(wildcards.release)
+    samples_list: list[str] = list(
+        samples.loc[
+            (samples.species == species)
+            & (samples.build == build)
+            & (samples.release == release)
+        ].sample_id
+    )
+
+    return {
+        "quant": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "tx2gene": ancient(f"resources/{species}.{build}.{release}/tx2gene.tsv"),
+    }
+
+
+def get_tximport_input(
+    wildcards: snakemake.io.Wildcards,
+    samples: pandas.DataFrame = samples,
+    config: dict[str, Any] = config,
+) -> dict[str, list[str]]:
+    """
+    Return expected input files for tximport wrapper,
+    according to user-input, and snakemake-wrapper requirements
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+    config    (dict[str, Any])        : Configuration file
+
+    Return (dict[str, list[str]]):
+    Dictionnary of all input files as required by tximport wrapper
+    """
+    species: str = str(wildcards.species)
+    build: str = str(wildcards.build)
+    release: str = str(wildcards.release)
+    samples_list: list[str] = list(
+        samples.loc[
+            (samples.species == species)
+            & (samples.build == build)
+            & (samples.release == release)
+        ].sample_id
+    )
+
+    return {
+        "quant": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "quant_genes": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "lib": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "aux_info": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "cmd_info": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "libparams": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "logs": expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs",
+            sample=samples_list,
+            species=[species],
+            build=[build],
+            release=[release],
+        ),
+        "tx_to_gene": ancient(f"resources/{species}.{build}.{release}/tx2gene.tsv"),
+    }
+
+
+def get_rnaseq_salmon_quant_multiqc_report_input(
+    wildcards: snakemake.io.Wildcards, samples: pandas.DataFrame = samples
+) -> dict[str, list[str]]:
+    """
+    Return expected input files for MultiQC report, according to user-input,
+    and snakemake-wrapper requirements
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+
+    Return (dict[str, list[str]]):
+    Dictionnary of all input files as required by MultiQC's snakemake-wrapper
+    """
+    results: dict[str, list[str]] = {"fastqc": [], "salmon": []}
+    datatype: str = "dna"
+    sample_iterator = zip(
+        samples.sample_id,
+        samples.species,
+        samples.build,
+        samples.release,
+    )
+    for sample, species, build, release in sample_iterator:
+        sample_data: dict[str, str | None] = get_sample_information(
+            snakemake.io.Wildcards(fromdict={"sample": sample}), samples
+        )
+        if sample_data.get("downstream_file"):
+            results["fastqc"].append(f"results/QC/report_pe/{sample}.1_fastqc.zip")
+            results["fastqc"].append(f"results/QC/report_pe/{sample}.2_fastqc.zip")
+        else:
+            results["fastqc"].append(f"results/QC/report_pe/{sample}_fastqc.zip")
+
+        results["salmon"].append(
+            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf"
+        )
+        results["salmon"].append(
+            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json"
+        )
+        results["salmon"].append(
+            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info"
+        )
+        results["salmon"].append(
+            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json"
+        )
+        results["salmon"].append(
+            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams"
+        )
+        results["salmon"].append(
+            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs"
+        )
+
+    return results
+
+
+def get_rnaseq_salmon_quant_target(
+    wildcards: snakemake.io.Wildcards,
     samples: pandas.DataFrame = samples,
     config: dict[str, Any] = config,
 ) -> dict[str, list[str]]:
@@ -195,6 +406,12 @@ def get_rnaseq_salmon_quant_target(wildcards: snakemake.io.Wildcards,
     Dictionnary of expected output files
     """
     results: dict[str, list[str]] = {
+        "multiqc": [
+            "results/QC/MultiQC.html",
+            "results/QC/MultiQC_data.zip",
+            "results/QC/MultiQC_Quantification.html",
+            "results/QC/MultiQC_Quantificatio_data.zip",
+        ],
         "quant": [],
     }
 
@@ -207,8 +424,10 @@ def get_rnaseq_salmon_quant_target(wildcards: snakemake.io.Wildcards,
 
     for sample, species, build, release in sample_iterator:
         for counts in ["Raw", "TPM"]:
-            for targets in ["transcripts", "genes"]
+            for targets in ["transcripts", "genes"]:
                 results["quant"].append(
                     f"results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv"
                 )
-        
+
+
+    return results

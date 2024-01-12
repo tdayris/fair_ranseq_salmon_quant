@@ -5,7 +5,7 @@ rule fastp_trimming_pair_ended:
         trimmed=temp(
             expand(
                 "tmp/fastp/trimmed/{sample}.{stream}.fastq",
-                stream=["1", "2"],
+                stream=stream_list,
                 allow_missing=True,
             )
         ),

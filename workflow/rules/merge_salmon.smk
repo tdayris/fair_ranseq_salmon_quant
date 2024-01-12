@@ -1,10 +1,6 @@
 rule aggregate_salmon_counts:
     input:
-        quant=expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf",
-            sample=samples.sample_id,
-        ),
-        tx2gene="resources/{species}.{build}.{release}/tx2gene.tsv",
+        unpack(get_aggregate_salmon_counts_input),
     output:
         tsv=protected(
             "results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv"
@@ -21,7 +17,9 @@ rule aggregate_salmon_counts:
         genes=lambda wildcards: str(wildcards.counts).lower().startswith("gene"),
         index_label=True,
         fillna=0,
-        column=lambda wildcards: "NumReads" if str(wildcards.counts).lower() == "raw" else "TPM",
+        column=lambda wildcards: "NumReads"
+        if str(wildcards.counts).lower() == "raw"
+        else "TPM",
     conda:
         "../envs/python.yaml"
     script:

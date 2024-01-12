@@ -12,6 +12,7 @@ snakefiles := \
 	"../workflow/rules/merge_salmon.smk" \
 	"../workflow/rules/salmon_quant_meta.smk" \
 	"../workflow/rules/fair_genome_indexer_pipeline.smk" \
+	"../workflow/rules/fair_fastqc_multiqc.smk" \
 	"../workflow/rules/common.smk" \
 	"../workflow/Snakefile"
 
@@ -36,12 +37,12 @@ report.txt: pipeline.txt
 		--report report.html 2>&1 | tee report.txt
 
 
-pipeline.txt: linter.txt
+pipeline.txt: linter.txt format.txt black.txt
 	mamba activate test-snakemake-wrappers && \
 	snakemake -s ../workflow/Snakefile \
 		--cores 2 \
 		--software-deployment-method conda \
-		--workflow-profile ../profiles 2>&1 | tee pipeline.txt
+		2>&1 | tee pipeline.txt
 
 
 format.txt:

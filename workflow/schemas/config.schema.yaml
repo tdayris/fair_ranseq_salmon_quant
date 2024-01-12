@@ -33,12 +33,24 @@ params:
 
 
   fastp:
-    type: str
+    type: object
     description: Optional parameters for Fastp
+    adapters:
+      type: string
+      description: Optional adapters to trimm
+    extra:
+      type: string
+      description: Optional command line arguments for Fastp
+
+  multiqc:
+    type: string
+    description: Optional command line arguments for MultiQC
 
   tximport:
     type: str
     description: Optional parameters for tximport
+
+  fastqc:
 
 required:
   - samples
