@@ -20,9 +20,9 @@ from os.path import dirname, basename
 from snakemake.utils import makedirs
 
 
-def read_tx2gene(path: str,
-                 genes: bool = False,
-                 header: bool = False) -> pandas.DataFrame:
+def read_tx2gene(
+    path: str, genes: bool = False, header: bool = False
+) -> pandas.DataFrame:
     """
     This function reads a TSV file containing the following columns:
 
@@ -37,15 +37,21 @@ def read_tx2gene(path: str,
         sep="\t",
         index_col=None,
         header=(0 if header is True else None),
-        dtype=str
+        dtype=str,
     )
     try:
         if len(t2g.columns.tolist()) == 3:
             t2g.columns = ["Ensembl_Gene_ID", "Ensembl_Transcript_ID", "Hugo_ID"]
         else:
             t2g.columns = [
-                "Chromosome", "Source", "Strand", "Ensembl_Gene_ID",
-                "Ensembl_Transcript_ID", "Hugo_ID", "Start", "End"
+                "Chromosome",
+                "Source",
+                "Strand",
+                "Ensembl_Gene_ID",
+                "Ensembl_Transcript_ID",
+                "Hugo_ID",
+                "Start",
+                "End",
             ]
 
         if genes is True:
@@ -53,17 +59,25 @@ def read_tx2gene(path: str,
             if len(t2g.columns.tolist()) == 3:
                 t2g = t2g[["Ensembl_Gene_ID", "Hugo_ID"]].drop_duplicates()
             else:
-                t2g = t2g[["Ensembl_Gene_ID", "Hugo_ID", "Chromosome", "Start", "End", "Strand"]].drop_duplicates()
-            t2g.set_index("Ensembl_Gene_ID", inplace = True)
+                t2g = t2g[
+                    [
+                        "Ensembl_Gene_ID",
+                        "Hugo_ID",
+                        "Chromosome",
+                        "Start",
+                        "End",
+                        "Strand",
+                    ]
+                ].drop_duplicates()
+            t2g.set_index("Ensembl_Gene_ID", inplace=True)
         else:
-            t2g.set_index("Ensembl_Transcript_ID", inplace = True)
+            t2g.set_index("Ensembl_Transcript_ID", inplace=True)
     except ValueError:
         logging.debug("Wrong tx_to_gene column format?")
         logging.debug(t2g.columns.tolist())
         raise
 
     return t2g
-
 
 
 def read_salmon(path: str) -> pandas.DataFrame:
@@ -76,27 +90,17 @@ def read_salmon(path: str) -> pandas.DataFrame:
         sep="\t",
         index_col=0,
         header=0,
-        dtype={
-            0: str,
-            1: numpy.float,
-            2: numpy.float,
-            3: numpy.float,
-            4: numpy.float
-        },
-        na_values=""
+        dtype={0: str, 1: numpy.float, 2: numpy.float, 3: numpy.float, 4: numpy.float},
+        na_values="",
     )
 
     if snakemake.params.get("drop_patch", False) is True:
-        df.index = [i.split('.')[0] for i in df.index.tolist()]
+        df.index = [i.split(".")[0] for i in df.index.tolist()]
 
     return df
 
 
-logging.basicConfig(
-    filename=snakemake.log[0],
-    filemode="w",
-    level=logging.DEBUG
-)
+logging.basicConfig(filename=snakemake.log[0], filemode="w", level=logging.DEBUG)
 
 merged_frame: pandas.DataFrame | None = None
 
@@ -107,9 +111,9 @@ for quant in snakemake.input["quant"]:
     logging.debug("Cleaning dataframe")
     sample_id: str = basename(dirname(quant))
     if len(suffix := snakemake.params.get("suffix", "")) > 0:
-        sample_id = sample_id[:-len(suffix)]
+        sample_id = sample_id[: -len(suffix)]
     if len(prefix := snakemake.params.get("prefix", "")) > 0:
-        sample_id = sample_id[len(prefix):]
+        sample_id = sample_id[len(prefix) :]
 
     data = data[[snakemake.params.get("column", "TPM")]]
     data.columns = [sample_id]
@@ -117,10 +121,7 @@ for quant in snakemake.input["quant"]:
     logging.debug("Merging dataframe")
     try:
         merged_frame = pandas.merge(
-            merged_frame,
-            data,
-            left_index=True,
-            right_index=True
+            merged_frame, data, left_index=True, right_index=True
         )
     except TypeError:
         merged_frame = data
@@ -134,6 +135,9 @@ if snakemake.params.get("gencode", False) is True:
     merged_frame = merged_frame.set_index(
         pandas.DataFrame(merged_frame.index.str.split(".", 1).tolist())[0]
     )
+
+if (fillna := snakemake.params.get("fillna", None)) is not None:
+    merged_frame.fillna(fillna, inplace=True)
 
 if snakemake.params.get("drop_null", False) is True:
     logging.debug("Removing null values")
@@ -149,17 +153,13 @@ if (tr2gene_path := snakemake.input.get("tx2gene", None)) is not None:
     t2g = read_tx2gene(
         tr2gene_path,
         snakemake.params.get("genes", False),
-        snakemake.params.get("header", False)
+        snakemake.params.get("header", False),
     )
     logging.debug("tx2gene:")
     logging.debug(t2g.head())
 
     merged_frame = pandas.merge(
-        merged_frame,
-        t2g,
-        left_index=True,
-        right_index=True,
-        how="left"
+        merged_frame, t2g, left_index=True, right_index=True, how="left"
     )
 
 if snakemake.params.get("genes", False) is True:
@@ -167,8 +167,6 @@ if snakemake.params.get("genes", False) is True:
 else:
     merged_frame.index.name = "Ensembl_Transcript_ID"
 
-if (fillna := snakemake.params.get("fillna", None)) is not None:
-    merged_frame.fillna(fillna, inplace=True)
 
 logging.debug("Saving DataFrame to disk")
 merged_frame.to_csv(
@@ -177,8 +175,6 @@ merged_frame.to_csv(
     index=True,
     header=True,
     index_label=(
-        "target_id"
-        if snakemake.params.get("index_label", False) is True
-        else False
-    )
+        "target_id" if snakemake.params.get("index_label", False) is True else False
+    ),
 )

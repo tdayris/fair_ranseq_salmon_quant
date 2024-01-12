@@ -78,5 +78,137 @@ wildcard_constraints:
     species=r"|".join(species_list),
 
 
-def get_salmon_quant_target():
-    pass
+def get_sample_information(
+    wildcards: snakemake.io.Wildcards, samples: pandas.DataFrame
+) -> dict[str, str | None]:
+    """
+    Return sample information for a given {sample} wildcards
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe samples and their input files
+
+    Return (dict[str, str | None]):
+    Sample information
+    """
+    result: str | None = samples.loc[(samples["sample_id"] == str(wildcards.sample))]
+    if len(result) > 0:
+        return next(iter(result.to_dict(orient="index").values()))
+    return defaultdict(lambda: None)
+
+
+
+def get_reference_genome_data(
+    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame
+) -> dict[str, str | None]:
+    """
+    Return genome information for a given set of {species, build, release} wildcards
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    genomes   (pandas.DataFrame)      : Describe genomes and reference file(s)
+
+    Return (dict[str, str | None]):
+    Genome information
+    """
+    result: str | None = genomes.loc[
+        (genomes["species"] == str(wildcards.species))
+        & (genomes["build"] == str(wildcards.build))
+        & (genomes["release"] == str(wildcards.release))
+    ]
+    if len(result) > 0:
+        return next(iter(result.to_dict(orient="index").values()))
+    return defaultdict(lambda: None)
+
+
+def get_salmon_quant_target(    wildcards: snakemake.io.Wildcards,
+    samples: pandas.DataFrame = samples,
+    config: dict[str, Any] = config,
+) -> dict[str, list[str]]:
+    """
+    Return expected input files for Bowtie2 mapping, according to user-input,
+    and snakemake-wrapper requirements
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+    config    (dict[str, Any])        : Configuration file
+
+    Return (dict[str, list[str]]):
+    Dictionnary of all input files as required by Fastp's snakemake-wrapper
+    """
+    sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
+    downstream_file: str | None = sample_data.get("downstream_file")
+    if downstream_file or not pandas.isna(downstream_file):
+        return {
+            "r1": f"tmp/fastp/trimmed/{wildcards.sample}.1.fastq",
+            "r1": f"tmp/fastp/trimmed/{wildcards.sample}.2.fastq",
+        }
+
+    return {
+        "r": f"tmp/fastp/trimmed/{wildcards.sample}.fastq",
+    }
+
+
+def get_fastp_trimming_input(
+    wildcards: snakemake.io.Wildcards,
+    samples: pandas.DataFrame = samples,
+    config: dict[str, Any] = config,
+) -> dict[str, list[str]]:
+    """
+    Return expected input files for Bowtie2 mapping, according to user-input,
+    and snakemake-wrapper requirements
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+    config    (dict[str, Any])        : Configuration file
+
+    Return (dict[str, list[str]]):
+    Dictionnary of all input files as required by Fastp's snakemake-wrapper
+    """
+    sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
+    downstream_file: str | None = sample_data.get("downstream_file")
+    if downstream_file or not pandas.isna(downstream_file):
+        return {
+            "sample": [sample_data["upstream_file"], downstream_file],
+        }
+
+    return {
+        "sample": [sample_data["upstream_file"]],
+    }
+
+
+def get_rnaseq_salmon_quant_target(wildcards: snakemake.io.Wildcards,
+    samples: pandas.DataFrame = samples,
+    config: dict[str, Any] = config,
+) -> dict[str, list[str]]:
+    """
+    Return the expected list of output files at the end of the pipeline
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
+    config    (dict[str, Any])        : Configuration file
+
+    Return (dict[str, List(str)]):
+    Dictionnary of expected output files
+    """
+    results: dict[str, list[str]] = {
+        "quant": [],
+    }
+
+    sample_iterator = zip(
+        samples.sample_id,
+        samples.species,
+        samples.build,
+        samples.release,
+    )
+
+    for sample, species, build, release in sample_iterator:
+        for counts in ["Raw", "TPM"]:
+            for targets in ["transcripts", "genes"]
+                results["quant"].append(
+                    f"results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv"
+                )
+        

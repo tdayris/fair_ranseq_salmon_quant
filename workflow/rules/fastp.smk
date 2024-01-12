@@ -23,7 +23,7 @@ rule fastp_trimming_pair_ended:
         adapters=config.get("params", {}).get("fastp", {}).get("adapters", ""),
         extra=config.get("params", {}).get("fastp", {}).get("extra", ""),
     wrapper:
-        f"{snakemake_wrappers_version}/bio/fastp"
+        "v3.3.3/bio/fastp"
 
 
 use rule fastp_trimming_pair_ended as fastp_trimming_single_ended with:

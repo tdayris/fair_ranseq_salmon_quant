@@ -1,16 +1,19 @@
 include: "rules/common.smk"
 include: "rules/fastp.smk"
 
+
 if config.get("load_fair_genome_indexer", True):
 
     include: "rules/fair_genome_indexer_pipeline.smk"
 
+
 include: "rules/salmon_quant_meta.smk"
 include: "rules/merge_salmon.smk"
 
+
 rule salmon_quant_target:
-    include:
-        unpack(get_salmon_quant_target),
+    input:
+        unpack(get_rnaseq_salmon_quant_target),
     localrule: True
     threads: 1
     resources:
@@ -18,6 +21,6 @@ rule salmon_quant_target:
         runtime=2,
         tmpdir="tmp",
     log:
-        "logs/target/salmon_quant_target.log"
+        "logs/target/salmon_quant_target.log",
     benchmark:
         "logs/target/salmon_quant_target.tsv"

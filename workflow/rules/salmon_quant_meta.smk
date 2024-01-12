@@ -1,6 +1,6 @@
 module salmon_tximport:
     meta_wrapper:
-        f"{snakemake_wrappers_version}/meta/bio/salmon_tximport"
+        "v3.3.3/meta/bio/salmon_tximport"
     config:
         config
 
@@ -15,7 +15,7 @@ use rule salmon_decoy_sequences from salmon_tximport with:
     log:
         "logs/salmon/decoy_sequence/{species}.{build}.{release}.log",
     benchmark:
-        "benchmark/salmon/decoy_sequence/{species}.{build}.{release}.tsv",
+        "benchmark/salmon/decoy_sequence/{species}.{build}.{release}.tsv"
 
 
 use rule salmon_index_gentrome from salmon_tximport with:
@@ -44,12 +44,14 @@ use rule salmon_index_gentrome from salmon_tximport with:
     log:
         "logs/salmon/index/{species}.{build}.{release}.log",
     benchmark:
-        "benchmark/salmon/index/{species}.{build}.{release}.tsv",
+        "benchmark/salmon/index/{species}.{build}.{release}.tsv"
     params:
-        extra=config.get("params", {}).get("salmon", {}).get("index", "")
+        extra=config.get("params", {}).get("salmon", {}).get("index", ""),
+
 
 use rule salmon_quant_reads from salmon_tximport with:
     input:
+        unpack(get_salmon_quant_reads_input),
         r="tmp/fastp/trimmed/{sample}.{stream}.fastq",
         index=multiext(
             "reference/{species}.{build}.{release}/salmon_index_{species}.{build}.{release}",
@@ -70,19 +72,32 @@ use rule salmon_quant_reads from salmon_tximport with:
             "versionInfo.json",
         ),
         gtf="resources/{species}.{build}.{release}.gtf",
-        unpack(get_salmon_quant_reads_input)
     output:
         quant=temp("tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf"),
-        quant_gene=temp("tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf"),
-        lib=temp("tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json"),
-        aux_info=temp(directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info")),
-        cmd_info=temp("tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json"),
-        libparams=temp(directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams")),
-        logs=temp(directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs")),
+        quant_gene=temp(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf"
+        ),
+        lib=temp(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json"
+        ),
+        aux_info=temp(
+            directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info")
+        ),
+        cmd_info=temp(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json"
+        ),
+        libparams=temp(
+            directory(
+                "tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams"
+            )
+        ),
+        logs=temp(
+            directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs")
+        ),
     log:
         "logs/salmon/quant/{sample}.log",
     benchmark:
-        "benchmark/salmon/quant/{sample}.tsv",
+        "benchmark/salmon/quant/{sample}.tsv"
     params:
         libtype="A",
         extra=config.get("params", {}).get("salmon", {}).get("quant", ""),
@@ -91,28 +106,37 @@ use rule salmon_quant_reads from salmon_tximport with:
 rule tximport:
     input:
         quant=expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf", sample=samples.sample_id
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf",
+            sample=samples.sample_id,
         ),
         lib=expand(
             "tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json",
             sample=samples.sample_id,
         ),
         aux_info=expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info", sample=samples.sample_id
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info",
+            sample=samples.sample_id,
         ),
         cmd_info=expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json", sample=samples.sample_id
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json",
+            sample=samples.sample_id,
         ),
         libparams=expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams", sample=samples.sample_id
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams",
+            sample=samples.sample_id,
         ),
-        logs=expand("tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs", sample=samples.sample_id),
+        logs=expand(
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs",
+            sample=samples.sample_id,
+        ),
         tx_to_gene="resources/{species}.{build}.{release}/tx2gene.tsv",
     output:
-        txi=temp("tmp/tximport/{species}.{build}.{release}/SummarizedExperimentObject.RDS"),
+        txi=temp(
+            "tmp/tximport/{species}.{build}.{release}/SummarizedExperimentObject.RDS"
+        ),
     params:
         extra="type='salmon'",
     log:
-        "logs/tximport/{species}.{build}.{release}.log"
+        "logs/tximport/{species}.{build}.{release}.log",
     benchmark:
         "benchmark/tximport/{species}.{build}.{release}.tsv"
