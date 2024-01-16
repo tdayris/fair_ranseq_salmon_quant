@@ -28,3 +28,5 @@ genomes: "config/genome.csv"
 # Deactivate import of fair_genome_indexer pipeline.
 # Requires the file `genome.csv` to be filled.
 # load_fair_genome_indexer: true
+# Deactivate import of fair_fastqc_multiqc pipeline.
+# load_fair_fastqc_multiqc: true

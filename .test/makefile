@@ -12,7 +12,7 @@ snakefiles := \
 	"../workflow/rules/merge_salmon.smk" \
 	"../workflow/rules/salmon_quant_meta.smk" \
 	"../workflow/rules/fair_genome_indexer_pipeline.smk" \
-	"../workflow/rules/fair_fastqc_multiqc.smk" \
+	"../workflow/rules/fair_fastqc_multiqc_pipeline.smk" \
 	"../workflow/rules/common.smk" \
 	"../workflow/Snakefile"
 
@@ -73,4 +73,5 @@ clean:
 		   report.txt \
 		   pipeline.txt \
 		   genomes.csv \
-		   dag.png
+		   dag.png \
+		   black.txt
