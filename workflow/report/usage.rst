@@ -44,7 +44,7 @@ Second, run:
     
     snakedeploy deploy-workflow \
                 https://github.com/tdayris/fair_rnaseq_salmon_quant . \
-                --tag v2.2.0
+                --tag v1.0.0
 
 Snakedeploy will create two folders `workflow` and `config`. The former contains the 
 deployment of the chosen workflow as a `Snakemake module`_, the latter contains 

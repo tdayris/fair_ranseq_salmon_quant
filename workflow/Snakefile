@@ -6,14 +6,16 @@ if config.get("load_fair_genome_indexer", True):
     include: "rules/fair_genome_indexer_pipeline.smk"
 
 
-if config.get("load_fair_fastq_multiqc", True):
+if config.get("load_fair_fastqc_multiqc", True):
 
     include: "rules/fair_fastqc_multiqc_pipeline.smk"
 
 
+include: "rules/datavzrd.smk"
 include: "rules/fastp.smk"
-include: "rules/salmon_quant_meta.smk"
 include: "rules/merge_salmon.smk"
+include: "rules/multiqc.smk"
+include: "rules/salmon_quant_meta.smk"
 
 
 rule salmon_quant_target:

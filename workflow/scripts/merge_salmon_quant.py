@@ -90,7 +90,6 @@ def read_salmon(path: str) -> pandas.DataFrame:
         sep="\t",
         index_col=0,
         header=0,
-        dtype={0: str, 1: numpy.float, 2: numpy.float, 3: numpy.float, 4: numpy.float},
         na_values="",
     )
 

@@ -2,6 +2,22 @@ samples: config/samples.csv
 
 # Optional parameters
 params:
+  # Optional parameters for pyfaidx
+  pyfaidx:
+    # Filter-out non canonical chromosomes
+    dna: '--regex "^[[0-9]+|X|Y|MT]"'
+    # Keep all cdna sequences
+    cdna: '--regex "^.+\|.+\|.+\|[[0-9]+|X|Y|MT]"'
+  # Optional parameters for agat (filter/correct GTF format)
+  agat:
+    # Optional parameters for agat_convert_sp_gff2gtf.pl
+    gff2gtf: ""
+    # Optional parameters for agat_sq_filter_feature_from_fasta.pl
+    filter_features: ""
+    # Optional parameters for agat_sq_select_feature_by_attribute_value.pl
+    select_feature_by_attribute_value: "--attribute 'transcript_support_level' --value '\"NA\"' --test '='"
+    # Optional parameters for agat_convert_sp_gff2tsv
+    agat_convert_sp_gff2tsv: ""
   # Optional parameters for fastqc
   fastqc: ""
   # Optional parameters for fastp trimming and QC
@@ -22,7 +38,7 @@ params:
   multiqc: --module fastqc --module salmon --module fastp --zip-data-dir --verbose --no-megaqc-upload --no-ansi --force
 
 # Optional path to a genome.csv file
-genomes: "config/genome.csv"
+genomes: "config/genomes.csv"
 
 # Instenal use only, not described in documentation.
 # Deactivate import of fair_genome_indexer pipeline.

@@ -13,12 +13,14 @@ snakefiles := \
 	"../workflow/rules/salmon_quant_meta.smk" \
 	"../workflow/rules/fair_genome_indexer_pipeline.smk" \
 	"../workflow/rules/fair_fastqc_multiqc_pipeline.smk" \
+	"../workflow/rules/datavzrd.smk" \
 	"../workflow/rules/common.smk" \
 	"../workflow/Snakefile"
 
 
 python_scripts := \
-	"../workflow/scripts/merge_salmon_quant.py"
+	"../workflow/scripts/merge_salmon_quant.py" \
+	"../workflow/scripts/build_datavzrd_yaml.py"
 
 .PHONY: all
 all: report.txt

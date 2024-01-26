@@ -22,7 +22,7 @@ snakemake.utils.validate(config, "../schemas/config.schema.yaml")
 # Load and check samples properties table
 sample_table_path: str = config.get("samples", "config/samples.csv")
 with open(sample_table_path, "r") as sample_table_stream:
-    dialect: csv.Dialect = csv.Sniffer().sniff(sample_table_stream.read(1024))
+    dialect: csv.Dialect = csv.Sniffer().sniff(sample_table_stream.readline())
     sample_table_stream.seek(0)
 
 samples: pandas.DataFrame = pandas.read_csv(
@@ -40,7 +40,7 @@ snakemake.utils.validate(samples, "../schemas/samples.schema.yaml")
 genome_table_path: str = config.get("genomes")
 if genome_table_path:
     with open(genome_table_path, "r") as genome_table_stream:
-        dialect: csv.Dialect = csv.Sniffer().sniff(genome_table_stream.read(1024))
+        dialect: csv.Dialect = csv.Sniffer().sniff(genome_table_stream.readline())
         genome_table_stream.seek(0)
 
     genomes: pandas.DataFrame = pandas.read_csv(
@@ -61,8 +61,6 @@ else:
 
 snakemake.utils.validate(genomes, "../schemas/genomes.schema.yaml")
 
-snakemake_wrappers_version: str = "v3.0.0"
-
 
 report: "../report/workflow.rst"
 
@@ -70,7 +68,7 @@ report: "../report/workflow.rst"
 release_list: list[str] = list(set(genomes.release.tolist()))
 build_list: list[str] = list(set(genomes.build.tolist()))
 species_list: list[str] = list(set(genomes.species.tolist()))
-datatype_list: list[str] = ["dna", "cdna"]
+datatype_list: list[str] = ["dna", "cdna", "gentrome"]
 stream_list: list[str] = ["1", "2"]
 
 
@@ -149,10 +147,13 @@ def get_salmon_quant_reads_input(
     build: str = str(wildcards.build)
     sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
     downstream_file: str | None = sample_data.get("downstream_file")
-    salmon_index: list[str] | None = get_reference_genome_data(wildcards, genomes).get("salmon_index")
+    genome_data: dict[str, str | None] = get_reference_genome_data(wildcards, genomes)
+    salmon_index: list[str] | None = genome_data.get(
+        "salmon_index"
+    )
     if not salmon_index:
         salmon_index = multiext(
-            f"reference/{species}.{build}.{release}/salmon_index_{species}.{build}.{release}",
+            f"reference/salmon_index/{species}.{build}.{release}/{species}.{build}.{release}/",
             "complete_ref_lens.bin",
             "ctable.bin",
             "ctg_offsets.bin",
@@ -169,10 +170,10 @@ def get_salmon_quant_reads_input(
             "seq.bin",
             "versionInfo.json",
         )
-    
+
     results: dict[str, str | list[str]] = {
         "index": ancient(salmon_index),
-        "gtf": ancient(f"resources/{species}.{build}.{release}.gtf"),
+        "gtf": ancient(genome_data.get("gtf", f"reference/annotation/{species}.{build}.{release}.gtf")),
     }
 
     if downstream_file or not pandas.isna(downstream_file):
@@ -182,6 +183,32 @@ def get_salmon_quant_reads_input(
         results["r"] = f"tmp/fastp/trimmed/{wildcards.sample}.fastq"
 
     return results
+
+
+
+def get_salmon_decoy_sequences_input(
+    wildcards: snakemake.io.Wildcards,
+    genomes: pandas.DataFrame = genomes,
+) -> dict[str, list[str]]:
+    """
+    Return expected input files for Salmon indexation, according to user-input,
+    and snakemake-wrapper requirements
+
+    Parameters:
+    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
+    samples   (pandas.DataFrame)      : Describe genome files
+
+    Return (dict[str, list[str]]):
+    Dictionnary of all input files as required by snakemake-wrapper
+    """
+    genome_data: dict[str, str | None] = get_reference_genome_data(wildcards, genomes)
+    species: str = str(wildcards.species)
+    build: str = str(wildcards.build)
+    release: str = str(wildcards.release)
+    return {
+        "transcriptome": genome_data.get("transcripts_fasta", f"reference/sequences/{species}.{build}.{release}.transcripts.fasta"),
+        "genome": genome_data.get("dna_fasta", f"reference/sequences/{species}.{build}.{release}.dna.fasta"),
+    }
 
 
 def get_fastp_trimming_input(
@@ -249,7 +276,7 @@ def get_aggregate_salmon_counts_input(
             build=[build],
             release=[release],
         ),
-        "tx2gene": ancient(f"resources/{species}.{build}.{release}/tx2gene.tsv"),
+        "tx2gene": ancient(f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"),
     }
 
 
@@ -331,7 +358,7 @@ def get_tximport_input(
             build=[build],
             release=[release],
         ),
-        "tx_to_gene": ancient(f"resources/{species}.{build}.{release}/tx2gene.tsv"),
+        "tx_to_gene": ancient(f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"),
     }
 
 
@@ -407,10 +434,10 @@ def get_rnaseq_salmon_quant_target(
     """
     results: dict[str, list[str]] = {
         "multiqc": [
-            "results/QC/MultiQC.html",
-            "results/QC/MultiQC_data.zip",
+            "results/QC/MultiQC_FastQC.html",
+            "results/QC/MultiQC_FastQC_data.zip",
             "results/QC/MultiQC_Quantification.html",
-            "results/QC/MultiQC_Quantificatio_data.zip",
+            "results/QC/MultiQC_Quantification_data.zip",
         ],
         "quant": [],
     }
@@ -428,6 +455,5 @@ def get_rnaseq_salmon_quant_target(
                 results["quant"].append(
                     f"results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv"
                 )
-
 
     return results

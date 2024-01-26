@@ -20,7 +20,7 @@ rule fastp_trimming_pair_ended:
     benchmark:
         "benchmark/fastp/{sample}.tsv"
     params:
-        adapters=config.get("params", {}).get("fastp", {}).get("adapters", ""),
+        adapters=config.get("params", {}).get("fastp", {}).get("adapters"),
         extra=config.get("params", {}).get("fastp", {}).get("extra", ""),
     wrapper:
         "v3.3.3/bio/fastp"

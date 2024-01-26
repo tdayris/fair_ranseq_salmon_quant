@@ -7,11 +7,10 @@ module salmon_tximport:
 
 use rule salmon_decoy_sequences from salmon_tximport with:
     input:
-        transcriptome="reference/{species}.{build}.{release}.cdna.fasta",
-        genome="reference/{species}.{build}.{release}.dna.fasta",
+        unpack(get_salmon_decoy_sequences_input),
     output:
-        gentrome=temp("reference/{species}.{build}.{release}.gentrome.fasta"),
-        decoys=temp("reference/{species}.{build}.{release}.decoys.txt"),
+        gentrome=temp("reference/sequences/{species}.{build}.{release}.gentrome.fasta"),
+        decoys=temp("reference/sequences/{species}.{build}.{release}.decoys.txt"),
     log:
         "logs/salmon/decoy_sequence/{species}.{build}.{release}.log",
     benchmark:
@@ -20,27 +19,29 @@ use rule salmon_decoy_sequences from salmon_tximport with:
 
 use rule salmon_index_gentrome from salmon_tximport with:
     input:
-        sequences="reference/{species}.{build}.{release}.gentrome.fasta",
-        decoys="reference/{species}.{build}.{release}.decoys.txt",
+        sequences="reference/sequences/{species}.{build}.{release}.gentrome.fasta",
+        decoys="reference/sequences/{species}.{build}.{release}.decoys.txt",
     output:
-        temp(multiext(
-            "reference/{species}.{build}.{release}/salmon_index_{species}.{build}.{release}",
-            "complete_ref_lens.bin",
-            "ctable.bin",
-            "ctg_offsets.bin",
-            "duplicate_clusters.tsv",
-            "info.json",
-            "mphf.bin",
-            "pos.bin",
-            "pre_indexing.log",
-            "rank.bin",
-            "refAccumLengths.bin",
-            "ref_indexing.log",
-            "reflengths.bin",
-            "refseq.bin",
-            "seq.bin",
-            "versionInfo.json",
-        )),
+        temp(
+            multiext(
+                "reference/salmon_index/{species}.{build}.{release}/{species}.{build}.{release}/",
+                "complete_ref_lens.bin",
+                "ctable.bin",
+                "ctg_offsets.bin",
+                "duplicate_clusters.tsv",
+                "info.json",
+                "mphf.bin",
+                "pos.bin",
+                "pre_indexing.log",
+                "rank.bin",
+                "refAccumLengths.bin",
+                "ref_indexing.log",
+                "reflengths.bin",
+                "refseq.bin",
+                "seq.bin",
+                "versionInfo.json",
+            )
+        ),
     log:
         "logs/salmon/index/{species}.{build}.{release}.log",
     benchmark:
