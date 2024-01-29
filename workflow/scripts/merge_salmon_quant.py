@@ -14,11 +14,8 @@ __license__ = "MIT"
 
 import logging
 import pandas
-import numpy
 
 from os.path import dirname, basename
-from snakemake.utils import makedirs
-
 
 def read_tx2gene(
     path: str, genes: bool = False, header: bool = False

@@ -151,7 +151,9 @@ def get_salmon_quant_reads_input(
     salmon_index: list[str] | None = genome_data.get(
         "salmon_index"
     )
-    if not salmon_index:
+    if salmon_index:
+        salmon_index = list(map(str, Path(salmon_index).iterdir()))
+    else:
         salmon_index = multiext(
             f"reference/salmon_index/{species}.{build}.{release}/{species}.{build}.{release}/",
             "complete_ref_lens.bin",
@@ -270,7 +272,8 @@ def get_aggregate_salmon_counts_input(
 
     aggregate_salmon_counts_input: dict[str, str |list[str]] = {
         "quant": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf",
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/{quant_file}", # quant.genes.sf",
+            quant_file=(["quant.genes.sf"] if str(wildcards.release).lower().startswith("gene") else ["quant.sf"]),
             sample=samples_list,
             species=[species],
             build=[build],
