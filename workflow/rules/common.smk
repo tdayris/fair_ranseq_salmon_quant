@@ -268,7 +268,7 @@ def get_aggregate_salmon_counts_input(
         ].sample_id
     )
 
-    return {
+    aggregate_salmon_counts_input: dict[str, str |list[str]] = {
         "quant": expand(
             "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf",
             sample=samples_list,
@@ -276,8 +276,14 @@ def get_aggregate_salmon_counts_input(
             build=[build],
             release=[release],
         ),
-        "tx2gene": ancient(f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"),
     }
+
+    if str(wildcards.counts).lower().startswith("gene"):
+        aggregate_salmon_counts_input["tx2gene"] = ancient(f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv")
+    else:
+        aggregate_salmon_counts_input["tx2gene"] = ancient(f"reference/annotation/{species}.{build}.{release}.t2g.tsv")
+
+    return aggregate_salmon_counts_input
 
 
 def get_tximport_input(

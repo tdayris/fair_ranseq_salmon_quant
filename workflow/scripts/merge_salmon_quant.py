@@ -32,50 +32,31 @@ def read_tx2gene(
 
     And returns it as a DataFrame
     """
-    t2g: pandas.DataFrame = pandas.read_csv(
-        path,
-        sep="\t",
-        index_col=None,
-        header=(0 if header is True else None),
-        dtype=str,
-    )
-    try:
-        if len(t2g.columns.tolist()) == 3:
-            t2g.columns = ["Ensembl_Gene_ID", "Ensembl_Transcript_ID", "Hugo_ID"]
-        else:
-            t2g.columns = [
-                "Chromosome",
-                "Source",
-                "Strand",
-                "Ensembl_Gene_ID",
-                "Ensembl_Transcript_ID",
-                "Hugo_ID",
-                "Start",
-                "End",
-            ]
-
-        if genes is True:
-            logging.debug("Keeping only genes from tx2gene DataFrame")
-            if len(t2g.columns.tolist()) == 3:
-                t2g = t2g[["Ensembl_Gene_ID", "Hugo_ID"]].drop_duplicates()
-            else:
-                t2g = t2g[
-                    [
-                        "Ensembl_Gene_ID",
-                        "Hugo_ID",
-                        "Chromosome",
-                        "Start",
-                        "End",
-                        "Strand",
-                    ]
-                ].drop_duplicates()
-            t2g.set_index("Ensembl_Gene_ID", inplace=True)
-        else:
-            t2g.set_index("Ensembl_Transcript_ID", inplace=True)
-    except ValueError:
-        logging.debug("Wrong tx_to_gene column format?")
-        logging.debug(t2g.columns.tolist())
-        raise
+    if str(snakemake.wildcards.counts).lower().startswith("gene"):
+        t2g: pandas.DataFrame = pandas.read_csv(
+            path,
+            sep="\t",
+            index_col=None,
+            header=None,
+            dtype=str,
+        )
+        t2g.columns = [
+            "Ensembl_Gene_ID", 
+            "Gene_Name",
+        ]
+        t2g.drop_duplicates(inplace=True)
+        t2g.set_index("Ensembl_Gene_ID",  inplace=True)
+    else:
+        t2g: pandas.DataFrame = pandas.read_csv(
+            path,
+            sep=",",
+            index_col=None,
+            header=None,
+            dtype=str,
+        )
+        t2g.columns = ["Ensembl_Gene_ID", "Ensembl_Transcript_ID", "Gene_Name"]
+        t2g.drop_duplicates(inplace=True)
+        t2g.set_index("Ensembl_Transcript_ID",  inplace=True)
 
     return t2g
 
@@ -132,7 +113,7 @@ logging.debug(merged_frame.head())
 if snakemake.params.get("gencode", False) is True:
     logging.debug("Removing gencode patch ids")
     merged_frame = merged_frame.set_index(
-        pandas.DataFrame(merged_frame.index.str.split(".", 1).tolist())[0]
+        pandas.DataFrame(merged_frame.index.str.split(".").tolist())[0]
     )
 
 if (fillna := snakemake.params.get("fillna", None)) is not None:
