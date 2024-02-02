@@ -1,6 +1,6 @@
 rule datavzrd_salmon_yaml:
     input:
-        summary="results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv",
+        table="results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv",
     output:
         yaml=temp(
             "tmp/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.yaml"

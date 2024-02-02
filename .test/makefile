@@ -36,7 +36,7 @@ dag.png: linter.txt
 report.txt: pipeline.txt
 	mamba activate test-snakemake-wrappers && \
 	snakemake -s ../workflow/Snakefile \
-		--report report.html 2>&1 | tee report.txt
+		--report report.zip 2>&1 | tee report.txt
 
 
 pipeline.txt: linter.txt format.txt black.txt
@@ -76,4 +76,5 @@ clean:
 		   pipeline.txt \
 		   genomes.csv \
 		   dag.png \
-		   black.txt
+		   black.txt \
+		   report.zip 

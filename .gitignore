@@ -13,3 +13,4 @@
 .test/genomes.csv
 .test/black.txt
 .test/data
+.test/report*

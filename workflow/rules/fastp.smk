@@ -13,6 +13,7 @@ rule fastp_trimming_pair_ended:
             "results/QC/report_pe/{sample}.html",
             caption="../report/fastp.rst",
             category="Quality Controls",
+            subcategory="Trimming"
         ),
         json=temp("tmp/fastp/report_pe/{sample}.json"),
     log:

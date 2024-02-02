@@ -22,7 +22,7 @@ rule salmon_quant_target:
     input:
         unpack(get_rnaseq_salmon_quant_target),
     output:
-        genomes="reference/genomes/fair_rnaseq_salmon_quant.csv"
+        genomes="reference/genomes/fair_rnaseq_salmon_quant.csv",
     localrule: True
     threads: 1
     resources:

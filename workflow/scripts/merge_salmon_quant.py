@@ -17,6 +17,7 @@ import pandas
 
 from os.path import dirname, basename
 
+
 def read_tx2gene(
     path: str, genes: bool = False, header: bool = False
 ) -> pandas.DataFrame:
@@ -38,11 +39,11 @@ def read_tx2gene(
             dtype=str,
         )
         t2g.columns = [
-            "Ensembl_Gene_ID", 
+            "Ensembl_Gene_ID",
             "Gene_Name",
         ]
         t2g.drop_duplicates(inplace=True)
-        t2g.set_index("Ensembl_Gene_ID",  inplace=True)
+        t2g.set_index("Ensembl_Gene_ID", inplace=True)
     else:
         t2g: pandas.DataFrame = pandas.read_csv(
             path,
@@ -53,7 +54,7 @@ def read_tx2gene(
         )
         t2g.columns = ["Ensembl_Gene_ID", "Ensembl_Transcript_ID", "Gene_Name"]
         t2g.drop_duplicates(inplace=True)
-        t2g.set_index("Ensembl_Transcript_ID",  inplace=True)
+        t2g.set_index("Ensembl_Transcript_ID", inplace=True)
 
     return t2g
 

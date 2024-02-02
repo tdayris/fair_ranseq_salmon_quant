@@ -148,9 +148,7 @@ def get_salmon_quant_reads_input(
     sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
     downstream_file: str | None = sample_data.get("downstream_file")
     genome_data: dict[str, str | None] = get_reference_genome_data(wildcards, genomes)
-    salmon_index: list[str] | None = genome_data.get(
-        "salmon_index"
-    )
+    salmon_index: list[str] | None = genome_data.get("salmon_index")
     if salmon_index:
         salmon_index = list(map(str, Path(salmon_index).iterdir()))
     else:
@@ -175,7 +173,11 @@ def get_salmon_quant_reads_input(
 
     results: dict[str, str | list[str]] = {
         "index": ancient(salmon_index),
-        "gtf": ancient(genome_data.get("gtf", f"reference/annotation/{species}.{build}.{release}.gtf")),
+        "gtf": ancient(
+            genome_data.get(
+                "gtf", f"reference/annotation/{species}.{build}.{release}.gtf"
+            )
+        ),
     }
 
     if downstream_file or not pandas.isna(downstream_file):
@@ -185,7 +187,6 @@ def get_salmon_quant_reads_input(
         results["r"] = f"tmp/fastp/trimmed/{wildcards.sample}.fastq"
 
     return results
-
 
 
 def get_salmon_decoy_sequences_input(
@@ -208,8 +209,13 @@ def get_salmon_decoy_sequences_input(
     build: str = str(wildcards.build)
     release: str = str(wildcards.release)
     return {
-        "transcriptome": genome_data.get("transcripts_fasta", f"reference/sequences/{species}.{build}.{release}.transcripts.fasta"),
-        "genome": genome_data.get("dna_fasta", f"reference/sequences/{species}.{build}.{release}.dna.fasta"),
+        "transcriptome": genome_data.get(
+            "transcripts_fasta",
+            f"reference/sequences/{species}.{build}.{release}.transcripts.fasta",
+        ),
+        "genome": genome_data.get(
+            "dna_fasta", f"reference/sequences/{species}.{build}.{release}.dna.fasta"
+        ),
     }
 
 
@@ -270,10 +276,14 @@ def get_aggregate_salmon_counts_input(
         ].sample_id
     )
 
-    aggregate_salmon_counts_input: dict[str, str |list[str]] = {
+    aggregate_salmon_counts_input: dict[str, str | list[str]] = {
         "quant": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/{quant_file}", # quant.genes.sf",
-            quant_file=(["quant.genes.sf"] if str(wildcards.release).lower().startswith("gene") else ["quant.sf"]),
+            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/{quant_file}",  # quant.genes.sf",
+            quant_file=(
+                ["quant.genes.sf"]
+                if str(wildcards.release).lower().startswith("gene")
+                else ["quant.sf"]
+            ),
             sample=samples_list,
             species=[species],
             build=[build],
@@ -282,9 +292,13 @@ def get_aggregate_salmon_counts_input(
     }
 
     if str(wildcards.counts).lower().startswith("gene"):
-        aggregate_salmon_counts_input["tx2gene"] = ancient(f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv")
+        aggregate_salmon_counts_input["tx2gene"] = ancient(
+            f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"
+        )
     else:
-        aggregate_salmon_counts_input["tx2gene"] = ancient(f"reference/annotation/{species}.{build}.{release}.t2g.tsv")
+        aggregate_salmon_counts_input["tx2gene"] = ancient(
+            f"reference/annotation/{species}.{build}.{release}.t2g.tsv"
+        )
 
     return aggregate_salmon_counts_input
 
@@ -367,7 +381,9 @@ def get_tximport_input(
             build=[build],
             release=[release],
         ),
-        "tx_to_gene": ancient(f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"),
+        "tx_to_gene": ancient(
+            f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"
+        ),
     }
 
 
@@ -449,20 +465,31 @@ def get_rnaseq_salmon_quant_target(
             "results/QC/MultiQC_Quantification_data.zip",
         ],
         "quant": [],
+        "datavzrd": [],
     }
 
     sample_iterator = zip(
-        samples.sample_id,
         samples.species,
         samples.build,
         samples.release,
     )
 
-    for sample, species, build, release in sample_iterator:
+    genome_data = list(
+        set(
+            f"{species}.{build}.{release}"
+            for species, build, release in sample_iterator
+        )
+    )
+
+    for genome_version in genome_data:
         for counts in ["Raw", "TPM"]:
             for targets in ["transcripts", "genes"]:
                 results["quant"].append(
-                    f"results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv"
+                    f"results/{genome_version}/Quantification/{counts}.{targets}.tsv"
                 )
+
+        results["datavzrd"].append(
+            f"results/{genome_version}/Quantification/html_reports/TPM.genes"
+        )
 
     return results

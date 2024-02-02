@@ -70,7 +70,8 @@ if __name__ == "__main__":
     logging.basicConfig(filename=snakemake.log[0], filemode="w", level=logging.DEBUG)
     try:
         datavzrd_configuration: dict[str, Any] = fill_dict(
-            sample_name=snakemake.wildcards.sample,
+            counts=snakemake.wildcards.counts,
+            targets=snakemake.wildcards.targets,
             table_path=snakemake.input.table,
             table_description=table_description,
         )

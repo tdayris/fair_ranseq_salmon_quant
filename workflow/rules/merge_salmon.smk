@@ -17,9 +17,9 @@ rule aggregate_salmon_counts:
         genes=lambda wildcards: str(wildcards.counts).lower().startswith("gene"),
         index_label=True,
         fillna=0,
-        column=lambda wildcards: "NumReads"
-        if str(wildcards.counts).lower() == "raw"
-        else "TPM",
+        column=lambda wildcards: (
+            "NumReads" if str(wildcards.counts).lower() == "raw" else "TPM"
+        ),
     conda:
         "../envs/python.yaml"
     script:

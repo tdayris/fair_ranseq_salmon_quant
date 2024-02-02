@@ -1,3 +1,14 @@
+# 1.0.1
+
+## Features
+
+* Salmon quant merge now annotates transcripts as well as genes
+* DataVzrd to explore quantification if needed
+
+## Fix
+
+* Missing fastp report page
+
 # 1.0.0
 
 ## Features
