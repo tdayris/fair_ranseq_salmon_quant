@@ -1,3 +1,11 @@
+# 1.0.2
+
+* Use `lookup` and `branch` instead of hand made functions
+* Pipeline can be used through mamba + apptainer
+* fair_fastqc_multiqc_pipeline version 2.0.4
+* fair_genome_indexer version 3.1.4
+* snakemake wrappers v3.3.6
+
 # 1.0.1
 
 ## Features
