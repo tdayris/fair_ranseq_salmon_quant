@@ -49,7 +49,7 @@ jobs:
       with:
         directory: .test
         snakefile: workflow/Snakefile
-        args: "--software-deployment-method conda --show-failed-logs --cores 2 --conda-cleanup-pkgs cache --all-temp"
+        args: "--software-deployment-method conda --show-failed-logs --cores 2 --conda-cleanup-pkgs cache "
     - name: Test report
       uses: snakemake/snakemake-github-action@v1.25.1
       with:
