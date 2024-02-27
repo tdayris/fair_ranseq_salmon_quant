@@ -9,6 +9,7 @@ MAKEFLAGS += --no-builtin-rules
 # List of snakefiles to lint
 snakefiles := \
 	"../workflow/rules/fastp.smk" \
+	"../workflow/rules/multiqc.smk" \
 	"../workflow/rules/merge_salmon.smk" \
 	"../workflow/rules/salmon_quant_meta.smk" \
 	"../workflow/rules/fair_genome_indexer_pipeline.smk" \
