@@ -8,10 +8,7 @@ from typing import Any
 
 snakemake.utils.min_version("7.29.0")
 
-# containerized: "docker://snakemake/snakemake:v7.32.4"
-# containerized: "docker://mambaorg/micromamba:git-8440cec-jammy-cuda-12.2.0"
-# containerized: "docker://condaforge/mambaforge:23.3.1-1"
-
+container: "docker://snakemake/snakemake:v8.5.3"
 
 # Load and check configuration file
 configfile: "config/config.yaml"
@@ -101,7 +98,8 @@ def get_sample_information(
 
 
 def get_reference_genome_data(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame
+    wildcards: snakemake.io.Wildcards,
+    genomes: pandas.DataFrame = genomes,
 ) -> dict[str, str | None]:
     """
     Return genome information for a given set of {species, build, release} wildcards
@@ -181,261 +179,15 @@ def get_salmon_quant_reads_input(
     }
 
     if downstream_file or not pandas.isna(downstream_file):
-        results["r1"] = f"tmp/fastp/trimmed/{wildcards.sample}.1.fastq"
-        results["r2"] = f"tmp/fastp/trimmed/{wildcards.sample}.2.fastq"
-    else:
-        results["r"] = f"tmp/fastp/trimmed/{wildcards.sample}.fastq"
-
-    return results
-
-
-def get_salmon_decoy_sequences_input(
-    wildcards: snakemake.io.Wildcards,
-    genomes: pandas.DataFrame = genomes,
-) -> dict[str, list[str]]:
-    """
-    Return expected input files for Salmon indexation, according to user-input,
-    and snakemake-wrapper requirements
-
-    Parameters:
-    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
-    samples   (pandas.DataFrame)      : Describe genome files
-
-    Return (dict[str, list[str]]):
-    Dictionnary of all input files as required by snakemake-wrapper
-    """
-    genome_data: dict[str, str | None] = get_reference_genome_data(wildcards, genomes)
-    species: str = str(wildcards.species)
-    build: str = str(wildcards.build)
-    release: str = str(wildcards.release)
-    return {
-        "transcriptome": genome_data.get(
-            "transcripts_fasta",
-            f"reference/sequences/{species}.{build}.{release}.transcripts.fasta",
-        ),
-        "genome": genome_data.get(
-            "dna_fasta", f"reference/sequences/{species}.{build}.{release}.dna.fasta"
-        ),
-    }
-
-
-def get_fastp_trimming_input(
-    wildcards: snakemake.io.Wildcards,
-    samples: pandas.DataFrame = samples,
-    config: dict[str, Any] = config,
-) -> dict[str, list[str]]:
-    """
-    Return expected input files for Fastp mapping, according to user-input,
-    and snakemake-wrapper requirements
-
-    Parameters:
-    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
-    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
-    config    (dict[str, Any])        : Configuration file
-
-    Return (dict[str, list[str]]):
-    Dictionnary of all input files as required by Fastp's snakemake-wrapper
-    """
-    sample_data: dict[str, str | None] = get_sample_information(wildcards, samples)
-    downstream_file: str | None = sample_data.get("downstream_file")
-    if downstream_file and not pandas.isna(downstream_file):
-        return {
-            "sample": [sample_data["upstream_file"], downstream_file],
-        }
-
-    return {
-        "sample": [sample_data["upstream_file"]],
-    }
-
-
-def get_aggregate_salmon_counts_input(
-    wildcards: snakemake.io.Wildcards,
-    samples: pandas.DataFrame = samples,
-    config: dict[str, Any] = config,
-) -> dict[str, list[str]]:
-    """
-    Return expected input files for Salmon quant aggregation script,
-    according to user-input, and snakemake-wrapper requirements
-
-    Parameters:
-    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
-    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
-    config    (dict[str, Any])        : Configuration file
-
-    Return (dict[str, list[str]]):
-    Dictionnary of all input files as required by Salmon quant aggregation script
-    """
-    species: str = str(wildcards.species)
-    build: str = str(wildcards.build)
-    release: str = str(wildcards.release)
-    samples_list: list[str] = list(
-        samples.loc[
-            (samples.species == species)
-            & (samples.build == build)
-            & (samples.release == release)
-        ].sample_id
-    )
-
-    aggregate_salmon_counts_input: dict[str, str | list[str]] = {
-        "quant": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/{quant_file}",  # quant.genes.sf",
-            quant_file=(
-                ["quant.genes.sf"]
-                if str(wildcards.release).lower().startswith("gene")
-                else ["quant.sf"]
-            ),
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-    }
-
-    if str(wildcards.counts).lower().startswith("gene"):
-        aggregate_salmon_counts_input["tx2gene"] = ancient(
-            f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"
+        results["r1"] = (
+            f"tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{wildcards.sample}.1.fastq.gz"
+        )
+        results["r2"] = (
+            f"tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{wildcards.sample}.2.fastq.gz"
         )
     else:
-        aggregate_salmon_counts_input["tx2gene"] = ancient(
-            f"reference/annotation/{species}.{build}.{release}.t2g.tsv"
-        )
-
-    return aggregate_salmon_counts_input
-
-
-def get_tximport_input(
-    wildcards: snakemake.io.Wildcards,
-    samples: pandas.DataFrame = samples,
-    config: dict[str, Any] = config,
-) -> dict[str, list[str]]:
-    """
-    Return expected input files for tximport wrapper,
-    according to user-input, and snakemake-wrapper requirements
-
-    Parameters:
-    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
-    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
-    config    (dict[str, Any])        : Configuration file
-
-    Return (dict[str, list[str]]):
-    Dictionnary of all input files as required by tximport wrapper
-    """
-    species: str = str(wildcards.species)
-    build: str = str(wildcards.build)
-    release: str = str(wildcards.release)
-    samples_list: list[str] = list(
-        samples.loc[
-            (samples.species == species)
-            & (samples.build == build)
-            & (samples.release == release)
-        ].sample_id
-    )
-
-    return {
-        "quant": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "quant_genes": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "lib": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "aux_info": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "cmd_info": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "libparams": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "logs": expand(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs",
-            sample=samples_list,
-            species=[species],
-            build=[build],
-            release=[release],
-        ),
-        "tx_to_gene": ancient(
-            f"reference/annotation/{species}.{build}.{release}.id_to_gene.tsv"
-        ),
-    }
-
-
-def get_rnaseq_salmon_quant_multiqc_report_input(
-    wildcards: snakemake.io.Wildcards, samples: pandas.DataFrame = samples
-) -> dict[str, list[str]]:
-    """
-    Return expected input files for MultiQC report, according to user-input,
-    and snakemake-wrapper requirements
-
-    Parameters:
-    wildcards (snakemake.io.Wildcards): Required for snakemake unpacking function
-    samples   (pandas.DataFrame)      : Describe sample names and related paths/genome
-
-    Return (dict[str, list[str]]):
-    Dictionnary of all input files as required by MultiQC's snakemake-wrapper
-    """
-    results: dict[str, list[str]] = {"fastqc": [], "salmon": []}
-    datatype: str = "dna"
-    sample_iterator = zip(
-        samples.sample_id,
-        samples.species,
-        samples.build,
-        samples.release,
-    )
-    for sample, species, build, release in sample_iterator:
-        sample_data: dict[str, str | None] = get_sample_information(
-            snakemake.io.Wildcards(fromdict={"sample": sample}), samples
-        )
-        if sample_data.get("downstream_file"):
-            results["fastqc"].append(f"results/QC/report_pe/{sample}.1_fastqc.zip")
-            results["fastqc"].append(f"results/QC/report_pe/{sample}.2_fastqc.zip")
-        else:
-            results["fastqc"].append(f"results/QC/report_pe/{sample}_fastqc.zip")
-
-        results["salmon"].append(
-            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf"
-        )
-        results["salmon"].append(
-            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json"
-        )
-        results["salmon"].append(
-            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info"
-        )
-        results["salmon"].append(
-            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json"
-        )
-        results["salmon"].append(
-            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams"
-        )
-        results["salmon"].append(
-            f"tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs"
+        results["r"] = (
+            f"tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{wildcards.sample}.fastq.gz"
         )
 
     return results
@@ -461,8 +213,6 @@ def get_rnaseq_salmon_quant_target(
         "multiqc": [
             "results/QC/MultiQC_FastQC.html",
             "results/QC/MultiQC_FastQC_data.zip",
-            "results/QC/MultiQC_Quantification.html",
-            "results/QC/MultiQC_Quantification_data.zip",
         ],
         "quant": [],
         "datavzrd": [],
@@ -488,8 +238,12 @@ def get_rnaseq_salmon_quant_target(
                     f"results/{genome_version}/Quantification/{counts}.{targets}.tsv"
                 )
 
+        results["multiqc"].append(
+            f"results/{genome_version}/QC/MultiQC_Quantification.html"
+        )
         results["datavzrd"].append(
             f"results/{genome_version}/Quantification/html_reports/TPM.genes"
         )
 
+    results["multiqc"] = list(set(results["multiqc"]))
     return results

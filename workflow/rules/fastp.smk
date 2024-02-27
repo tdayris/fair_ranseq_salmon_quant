@@ -1,10 +1,14 @@
-rule fastp_trimming_pair_ended:
+rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
     input:
-        unpack(get_fastp_trimming_input),
+        sample=expand(
+            "tmp/fair_fastqc_multiqc/link_or_concat_pair_ended_input/{sample}.{stream}.fastq.gz",
+            stream=stream_list,
+            allow_missing=True,
+        ),
     output:
         trimmed=temp(
             expand(
-                "tmp/fastp/trimmed/{sample}.{stream}.fastq",
+                "tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.{stream}.fastq.gz",
                 stream=stream_list,
                 allow_missing=True,
             )
@@ -15,20 +19,42 @@ rule fastp_trimming_pair_ended:
             category="Quality Controls",
             subcategory="Trimming",
         ),
-        json=temp("tmp/fastp/report_pe/{sample}.json"),
+        json=temp(
+            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.json"
+        ),
+    threads: 5
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 1024,
+        runtime=lambda wildcards, attempt: attempt * 60,
+        tmpdir="tmp",
     log:
-        "logs/fastp/{sample}.log",
+        "logs/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.log",
     benchmark:
-        "benchmark/fastp/{sample}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.tsv"
     params:
-        adapters=config.get("params", {}).get("fastp", {}).get("adapters"),
-        extra=config.get("params", {}).get("fastp", {}).get("extra", ""),
+        adapters=lookup(dpath="params/fastp/adapters", within=config),
+        extra=lookup(dpath="params/fastp/extra", within=config),
     wrapper:
-        "v3.3.3/bio/fastp"
+        "v3.3.6/bio/fastp"
 
 
-use rule fastp_trimming_pair_ended as fastp_trimming_single_ended with:
+use rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended as fair_rnaseq_salmon_quant_fastp_trimming_single_ended with:
+    input:
+        sample=expand(
+            "tmp/fair_fastqc_multiqc/link_or_concat_single_ended_input/{sample}.fastq.gz",
+            allow_missing=True,
+        ),
     output:
-        trimmed=temp("tmp/fastp/trimmed/{sample}.fastq"),
-        html=temp("tmp/fastp/report_se/{sample}.html"),
-        json=temp("tmp/fastp/report_se/{sample}.json"),
+        trimmed=temp(
+            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.fastq.gz"
+        ),
+        html=temp(
+            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.html"
+        ),
+        json=temp(
+            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.json"
+        ),
+    log:
+        "logs/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.log",
+    benchmark:
+        "benchmark/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.tsv"

@@ -30,7 +30,8 @@ def read_tx2gene(
 
     And returns it as a DataFrame
     """
-    if str(snakemake.wildcards.counts).lower().startswith("gene"):
+    if genes is True:
+        logging.debug(f"Loading gene annotation at {path=}")
         t2g: pandas.DataFrame = pandas.read_csv(
             path,
             sep="\t",
@@ -42,9 +43,11 @@ def read_tx2gene(
             "Ensembl_Gene_ID",
             "Gene_Name",
         ]
+        t2g["Gene_Name"].fillna(t2g["Ensembl_Gene_ID"], inplace=True)
         t2g.drop_duplicates(inplace=True)
         t2g.set_index("Ensembl_Gene_ID", inplace=True)
     else:
+        logging.debug(f"Loading transcript annotation at {path=}")
         t2g: pandas.DataFrame = pandas.read_csv(
             path,
             sep=",",
@@ -53,6 +56,8 @@ def read_tx2gene(
             dtype=str,
         )
         t2g.columns = ["Ensembl_Gene_ID", "Ensembl_Transcript_ID", "Gene_Name"]
+        t2g["Ensembl_Transcript_ID"].fillna(t2g["Ensembl_Gene_ID"], inplace=True)
+        t2g["Gene_Name"].fillna(t2g["Ensembl_Gene_ID"], inplace=True)
         t2g.drop_duplicates(inplace=True)
         t2g.set_index("Ensembl_Transcript_ID", inplace=True)
 

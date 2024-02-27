@@ -3,12 +3,12 @@ rule datavzrd_salmon_yaml:
         table="results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv",
     output:
         yaml=temp(
-            "tmp/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.yaml"
+            "tmp/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.yaml"
         ),
     log:
-        "logs/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.config.log",
+        "logs/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.config.log",
     benchmark:
-        "benchmark/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.config.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.config.tsv"
     conda:
         "../envs/python.yaml"
     script:
@@ -17,7 +17,7 @@ rule datavzrd_salmon_yaml:
 
 rule datavzrd_salmon_render:
     input:
-        config="tmp/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.yaml",
+        config="tmp/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.yaml",
         table="results/{species}.{build}.{release}/Quantification/{counts}.{targets}.tsv",
     output:
         report(
@@ -34,10 +34,10 @@ rule datavzrd_salmon_render:
             },
         ),
     log:
-        "logs/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.render.log",
+        "logs/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.render.log",
     benchmark:
-        "benchmark/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.render.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.render.tsv"
     params:
         extra="",
     wrapper:
-        "v3.3.3/utils/datavzrd"
+        "v3.3.6/utils/datavzrd"

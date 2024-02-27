@@ -1,23 +1,38 @@
 module salmon_tximport:
     meta_wrapper:
-        "v3.3.3/meta/bio/salmon_tximport"
+        "v3.3.6/meta/bio/salmon_tximport"
     config:
         config
 
 
-use rule salmon_decoy_sequences from salmon_tximport with:
+use rule salmon_decoy_sequences from salmon_tximport as fair_rnaseq_salmon_quant_salmon_decoy_sequences with:
     input:
-        unpack(get_salmon_decoy_sequences_input),
+        transcriptome=getattr(
+            lookup(
+                query="species == '{species}' & release == '{release}' & build == '{build}'",
+                within=genomes,
+            ),
+            "cdna_fasta",
+            "reference/sequences/{species}.{build}.{release}.transcripts.fasta",
+        ),
+        genome=getattr(
+            lookup(
+                query="species == '{species}' & release == '{release}' & build == '{build}'",
+                within=genomes,
+            ),
+            "dna_fasta",
+            "reference/sequences/{species}.{build}.{release}.dna.fasta",
+        ),
     output:
         gentrome=temp("reference/sequences/{species}.{build}.{release}.gentrome.fasta"),
         decoys=temp("reference/sequences/{species}.{build}.{release}.decoys.txt"),
     log:
-        "logs/salmon/decoy_sequence/{species}.{build}.{release}.log",
+        "logs/fair_rnaseq_salmon_quant/salmon_decoy_sequences/{species}.{build}.{release}.log",
     benchmark:
-        "benchmark/salmon/decoy_sequence/{species}.{build}.{release}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/salmon_decoy_sequences/{species}.{build}.{release}.tsv"
 
 
-use rule salmon_index_gentrome from salmon_tximport with:
+use rule salmon_index_gentrome from salmon_tximport as fair_rnaseq_salmon_quant_salmon_index_gentrome with:
     input:
         sequences="reference/sequences/{species}.{build}.{release}.gentrome.fasta",
         decoys="reference/sequences/{species}.{build}.{release}.decoys.txt",
@@ -43,57 +58,118 @@ use rule salmon_index_gentrome from salmon_tximport with:
             )
         ),
     log:
-        "logs/salmon/index/{species}.{build}.{release}.log",
+        "logs/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.log",
     benchmark:
-        "benchmark/salmon/index/{species}.{build}.{release}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.tsv"
     params:
-        extra=config.get("params", {}).get("salmon", {}).get("index", ""),
+        extra=lookup(dpath="params/salmon/index", within=config),
 
 
-use rule salmon_quant_reads from salmon_tximport with:
+use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_salmon_quant_reads with:
     input:
         unpack(get_salmon_quant_reads_input),
     output:
-        quant=temp("tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.sf"),
+        quant=temp(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/quant.sf"
+        ),
         quant_gene=temp(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/quant.genes.sf"
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/quant.genes.sf"
         ),
         lib=temp(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/lib_format_counts.json"
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/lib_format_counts.json"
         ),
         aux_info=temp(
-            directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/aux_info")
+            directory(
+                "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/aux_info"
+            )
         ),
         cmd_info=temp(
-            "tmp/salmon/quant/{species}.{build}.{release}/{sample}/cmd_info.json"
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/cmd_info.json"
         ),
         libparams=temp(
             directory(
-                "tmp/salmon/quant/{species}.{build}.{release}/{sample}/libParams"
+                "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/libParams"
             )
         ),
         logs=temp(
-            directory("tmp/salmon/quant/{species}.{build}.{release}/{sample}/logs")
+            directory(
+                "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/logs"
+            )
         ),
     log:
-        "logs/salmon/quant/{sample}.{species}.{build}.{release}.log",
+        "logs/fair_rnaseq_salmon_quant/salmon_quant_pair_ended_reads/{sample}.{species}.{build}.{release}.log",
     benchmark:
-        "benchmark/salmon/quant/{sample}.{species}.{build}.{release}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/salmon_quant_pair_ended_reads/{sample}.{species}.{build}.{release}.tsv"
     params:
-        libtype="A",
-        extra=config.get("params", {}).get("salmon", {}).get("quant", ""),
+        libtype=lookup(dpath="params/salmon/libtype", within=config),
+        extra=lookup(dpath="params/salmon/quant", within=config),
 
 
-rule tximport:
+use rule tximport from salmon_tximport as fair_rnaseq_salmon_quant_tximport with:
     input:
-        unpack(get_tximport_input),
+        quant=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.sf",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        quant_genes=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant_genes.sf",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        lib=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/lib_format_counts.json",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        aux_info=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/aux_info",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        cmd_info=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/cmd_info.json",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        libparams=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/libParams",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        logs=expand(
+            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/logs",
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
+        ),
+        tx_to_gene=expand(
+            "reference/annotation/{genome.species}.{genome.build}.{genome.release}.id_to_gene.tsv",
+            genome=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=genomes,
+            ),
+        ),
     output:
         txi=temp(
-            "tmp/tximport/{species}.{build}.{release}/SummarizedExperimentObject.RDS"
+            "tmp/fair_rnaseq_salmon_quant/tximport/{species}.{build}.{release}/SummarizedExperimentObject.RDS"
         ),
     params:
-        extra="type='salmon'",
+        extra=lookup(dpath="params/tximport", within=config),
     log:
-        "logs/tximport/{species}.{build}.{release}.log",
+        "logs/fair_rnaseq_salmon_quant/tximport/{species}.{build}.{release}.log",
     benchmark:
-        "benchmark/tximport/{species}.{build}.{release}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant/tximport/{species}.{build}.{release}.tsv"
