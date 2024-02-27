@@ -1,0 +1,15 @@
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - snakemake
+  - apptainer
+  - black
+  - snakefmt
+  - squashfuse
+  - snakemake-executor-plugin-slurm
+  - snakemake-executor-plugin-cluster-generic
+  - pandas
+  - mamba
+  - pytest
