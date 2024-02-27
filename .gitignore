@@ -14,3 +14,7 @@
 .test/black.txt
 .test/data
 .test/report*
+.test/.cache/
+.test/.conda/
+.test/.condarc
+.test/.java/
