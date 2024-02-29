@@ -1,3 +1,25 @@
+`Gustave Roussy`_ special launching steps
+=========================================
+
+If you belong to `Gustave Roussy`_, and use `flamingo` computing cluster, please use the following command lines
+and ignore the rest of this documentation.
+
+::
+
+    # Activate conda environment
+    conda activate /mnt/beegfs/pipelines/unofficial-snakemake-wrappers/shared_install/snakemake_v8.4.8
+
+    # Deploy workflow with the version of your choice
+    snakedeploy deploy-workflow \
+        https://github.com/tdayris/fair_rnaseq_salmon_quant . \
+        --tag <version>
+
+    # Run snakemake command
+    snakemake --profile '/mnt/beegfs/pipelines/unofficial-snakemake-wrappers/profiles/slurm-web-8/'
+
+With `version` being the latest available version of this pipeline. Select your `version here`_
+
+
 Step 1 : Install Snakemake and Snakedeploy
 ==========================================
 
@@ -12,7 +34,10 @@ Given that Mamba is installed, run
     mamba create -c conda-forge \
                  -c bioconda \
                  --name snakemake \
-                 snakemake snakedeploy
+                 snakemake \
+                 snakedeploy \
+                 mamba \
+
 
 to install both Snakemake and Snakedeploy in an isolated environment.
 For all following commands ensure that this environment is activated 
@@ -44,7 +69,9 @@ Second, run:
     
     snakedeploy deploy-workflow \
                 https://github.com/tdayris/fair_rnaseq_salmon_quant . \
-                --tag v1.0.0
+                --tag <version>
+
+Where <version> is the latest available verison.
 
 Snakedeploy will create two folders `workflow` and `config`. The former contains the 
 deployment of the chosen workflow as a `Snakemake module`_, the latter contains 
@@ -73,13 +100,12 @@ the `Mamba package manager`_ by default), run Snakemake with:
 
 ::
     
-    snakemake --cores all --use-conda 
+    snakemake --cores all --software-deployment-method conda
 
 Snakemake will automatically detect the main `Snakefile` in the `workflow` subfolder 
 and execute the workflow module that has been defined by the deployment in step 2.
 
 For further options, e.g. for cluster and cloud execution, see Snakemake_ documentation.
-
 
 Step 5 : Generate report
 ========================
@@ -105,3 +131,5 @@ file in publications, or uploaded to a service like Zenodo_ in order to obtain a
 .. _`config/README.md`: https://github.com/tdayris/fair_rnaseq_salmon_quant/blob/main/config/README.md
 .. _Zenodo: https://zenodo.org/
 .. _DOI: https://en.wikipedia.org/wiki/Digital_object_identifier
+.. _`Gustave Roussy`: https://www.gustaveroussy.fr/en
+.. _`version here`: https://github.com/tdayris/fair_rnaseq_salmon_quant/releases
