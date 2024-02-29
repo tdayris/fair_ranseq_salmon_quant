@@ -1,3 +1,8 @@
+# 1.0.3
+
+* Documentation fixes
+* Sample schema update, downstream_file is now required
+
 # 1.0.2
 
 * Use `lookup` and `branch` instead of hand made functions

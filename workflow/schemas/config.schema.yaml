@@ -42,10 +42,34 @@ params:
       type: string
       description: Optional command line arguments for Fastp
 
+  type: object
+  description: Optional parameters for FastQC, MultiQC, and FastQScreen
+  fastqc:
+    type: string
+    description: Optional parameters for FastQC
   multiqc:
     type: string
-    description: Optional command line arguments for MultiQC
-
+    description: Optional parameters for MultiQC
+  fastq_screen:
+    type: object
+    subset:
+      type: integer
+      description: Number of reads used to build statistics
+    fastq_screen_config:
+      type: string
+      description: Path to fastq screen configuration
+    aligner:
+      type: string
+      description: Aligner used to index references
+      pattern: "^bowtie2?"
+    required:
+      - subset
+      - fastq_screen_config
+      - aligner
+  required:
+    - fastqc
+    - multiqc
+    - fastq_screen
   tximport:
     type: str
     description: Optional parameters for tximport

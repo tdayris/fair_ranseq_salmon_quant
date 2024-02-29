@@ -6,7 +6,7 @@ import snakemake.utils
 from collections import defaultdict
 from typing import Any
 
-snakemake.utils.min_version("7.29.0")
+snakemake.utils.min_version("8.1.0")
 
 container: "docker://snakemake/snakemake:v8.5.3"
 
