@@ -42,8 +42,6 @@ params:
       type: string
       description: Optional command line arguments for Fastp
 
-  type: object
-  description: Optional parameters for FastQC, MultiQC, and FastQScreen
   fastqc:
     type: string
     description: Optional parameters for FastQC
@@ -70,6 +68,9 @@ params:
     - fastqc
     - multiqc
     - fastq_screen
+    - salmon
+    - fastp
+
   tximport:
     type: str
     description: Optional parameters for tximport
