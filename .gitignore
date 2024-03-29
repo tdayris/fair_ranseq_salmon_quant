@@ -1,3 +1,4 @@
+.test/.wget-hsts
 .test/linter.txt
 .test/format.txt
 .test/pipeline.txt
