@@ -44,7 +44,7 @@ pipeline.txt: linter.txt format.txt black.txt
 	mamba activate test-snakemake-wrappers && \
 	snakemake -s ../workflow/Snakefile \
 		--cores 2 \
-		--software-deployment-method conda \
+		--software-deployment-method apptainer conda\
 		2>&1 | tee pipeline.txt
 
 
@@ -78,4 +78,5 @@ clean:
 		   genomes.csv \
 		   dag.png \
 		   black.txt \
-		   report.zip 
+		   report.zip \
+		   report

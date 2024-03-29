@@ -1,4 +1,18 @@
+# 1.0.3
+
+## Features:
+
+* fair_fastqc_multiqc_pipeline update to 2.1.0
+* snakemake-wrappers update to 3.4.0
+* MultiQC configuration file
+
+## Fixes:
+
+* Documentation errors
+
 # 1.0.2
+
+## Features:
 
 * Use `lookup` and `branch` instead of hand made functions
 * Pipeline can be used through mamba + apptainer
