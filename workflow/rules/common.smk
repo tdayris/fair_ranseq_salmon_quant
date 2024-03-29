@@ -1,4 +1,5 @@
 import csv
+import os
 import pandas
 import snakemake
 import snakemake.utils
@@ -67,6 +68,7 @@ build_list: list[str] = list(set(genomes.build.tolist()))
 species_list: list[str] = list(set(genomes.species.tolist()))
 datatype_list: list[str] = ["dna", "cdna", "gentrome"]
 stream_list: list[str] = ["1", "2"]
+tmp: str = f"{os.getcwd()}/tmp"
 
 
 wildcard_constraints:
