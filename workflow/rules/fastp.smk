@@ -35,7 +35,7 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
         adapters=lookup(dpath="params/fastp/adapters", within=config),
         extra=lookup(dpath="params/fastp/extra", within=config),
     wrapper:
-        "v3.4.0/bio/fastp"
+        "v3.7.0/bio/fastp"
 
 
 use rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended as fair_rnaseq_salmon_quant_fastp_trimming_single_ended with:
