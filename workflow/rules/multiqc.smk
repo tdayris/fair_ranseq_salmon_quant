@@ -1,4 +1,6 @@
 rule fair_rnaseq_salmon_quant_multiqc_config:
+    input:
+        "tmp/fair_fastqc_multiqc/bigr_logo.png",
     output:
         temp(
             "tmp/fair_rnaseq_salmon_quant/{species}.{build}.{release}/multiqc_config.yaml"
@@ -13,7 +15,7 @@ rule fair_rnaseq_salmon_quant_multiqc_config:
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/multiqc_config/{species}.{build}.{release}.tsv"
     params:
-        extra=lambda wildcards: {
+        extra=lambda wildcards, input: {
             "title": "RNA-Seq gene abundance estimation report",
             "subtitle": "From raw fastq to decoy aware gene abundance estimation with Salmon",
             "intro_text": (
@@ -29,7 +31,7 @@ rule fair_rnaseq_salmon_quant_multiqc_config:
             ),
             "show_analysis_paths": False,
             "show_analysis_time": False,
-            "custom_logo": str(workflow.source_path("../../images/bigr_logo.png")),
+            "custom_logo": input[0],
             "custom_logo_url": "https://www.gustaveroussy.fr/en",
             "custom_logo_title": "Bioinformatics Platform @ Gustave Roussy",
             "report_header_info": [
