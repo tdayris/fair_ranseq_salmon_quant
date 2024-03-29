@@ -7,21 +7,17 @@ module salmon_tximport:
 
 use rule salmon_decoy_sequences from salmon_tximport as fair_rnaseq_salmon_quant_salmon_decoy_sequences with:
     input:
-        transcriptome=getattr(
-            lookup(
-                query="species == '{species}' & release == '{release}' & build == '{build}'",
-                within=genomes,
-            ),
-            "cdna_fasta",
-            "reference/sequences/{species}.{build}.{release}.transcripts.fasta",
+        transcriptome=dlookup(
+            query="species == '{species}' & release == '{release} & build == '{build}'",
+            within=genomes,
+            key="cdna_fasta",
+            default="reference/sequences/{species}.{build}.{release}.transcripts.fasta",
         ),
-        genome=getattr(
-            lookup(
-                query="species == '{species}' & release == '{release}' & build == '{build}'",
-                within=genomes,
-            ),
-            "dna_fasta",
-            "reference/sequences/{species}.{build}.{release}.dna.fasta",
+        genome=dlookup(
+            query="species == '{species}' & release == '{release} & build == '{build}'",
+            within=genomes,
+            key="dna_fasta",
+            default="reference/sequences/{species}.{build}.{release}.dna.fasta",
         ),
     output:
         gentrome=temp("reference/sequences/{species}.{build}.{release}.gentrome.fasta"),

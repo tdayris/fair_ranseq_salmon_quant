@@ -10,6 +10,7 @@ from typing import Any
 
 snakemake.utils.min_version("8.1.0")
 
+
 container: "docker://snakemake/snakemake:v8.5.3"
 
 
@@ -80,6 +81,47 @@ wildcard_constraints:
     species=r"|".join(species_list),
     datatype=r"|".join(datatype_list),
     stream=r"|".join(stream_list),
+
+
+def dlookup(
+    dpath: str | None = None,
+    query: str | None = None,
+    cols: list[str] | None = None,
+    within=None,
+    key: str | None = None,
+    default: str | dict[str, Any] | None = None,
+) -> str:
+    """
+    Allow default values and attribute getter in lookup function
+
+    Parameters:
+    dpath       str | None                  : Passed to lookup function
+    query       str | None                  : Passed to lookup function
+    cols        str | None                  : Passed to lookup function
+    within      object                      : Passed to lookup function
+    key         str                         : Attribute name
+    default     str | dict[str, Any] | None : Default value to return
+    """
+    value = None
+    try:
+        value = lookup(dpath=dpath, query=query, cols=cols, within=within)
+    except LookupError:
+        value = default
+    except WorkflowError:
+        value = default
+    except KeyError:
+        value = default
+    except AttributeError:
+        value = default
+
+    if key is not None:
+        return getattr(
+            value,
+            key,
+            default,
+        )
+
+    return value
 
 
 def get_sample_information(
@@ -175,10 +217,11 @@ def get_salmon_quant_reads_input(
 
     results: dict[str, str | list[str]] = {
         "index": ancient(salmon_index),
-        "gtf": ancient(
-            genome_data.get(
-                "gtf", f"reference/annotation/{species}.{build}.{release}.gtf"
-            )
+        "gtf": dlookup(
+            query="species == '{species}' & build == '{build}' & release == '{release}'",
+            within=genomes,
+            key="gtf",
+            default="reference/annotation/{species}.{build}.{release}.gtf",
         ),
     }
 

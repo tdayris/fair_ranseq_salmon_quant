@@ -20,62 +20,49 @@ samples:
   description: Path to the CSV file defining samples and their corresponding fastq paths
 
 params:
-  type: object
-  salmon:
+  fair_rnaseq_salmon_quant:
     type: object
-    description: Optional parameters for Salmon
-    index:
-      type: string
-      description: Optional parameters for salmon index
-    quant:
-      type: string
-      description: Optional parameters for Salmon quant
+    salmon:
+      type: object
+      description: Optional parameters for Salmon
+      index:
+        type: string
+        description: Optional parameters for salmon index
+      quant:
+        type: string
+        description: Optional parameters for Salmon quant
 
 
-  fastp:
-    type: object
-    description: Optional parameters for Fastp
-    adapters:
-      type: string
-      description: Optional adapters to trimm
-    extra:
-      type: string
-      description: Optional command line arguments for Fastp
+    fastp:
+      type: object
+      description: Optional parameters for Fastp
+      adapters:
+        type: string
+        description: Optional adapters to trimm
+      extra:
+        type: string
+        description: Optional command line arguments for Fastp
 
-  fastqc:
-    type: string
-    description: Optional parameters for FastQC
-  multiqc:
-    type: string
-    description: Optional parameters for MultiQC
-  fastq_screen:
-    type: object
-    subset:
-      type: integer
-      description: Number of reads used to build statistics
-    fastq_screen_config:
+    fastqc:
       type: string
-      description: Path to fastq screen configuration
-    aligner:
+      description: Optional parameters for FastQC
+    multiqc:
       type: string
-      description: Aligner used to index references
-      pattern: "^bowtie2?"
-    required:
-      - subset
-      - fastq_screen_config
-      - aligner
-  required:
-    - fastqc
-    - multiqc
-    - fastq_screen
-    - salmon
-    - fastp
+      description: Optional parameters for MultiQC
+    fastq_screen:
+      type: object
+      subset:
+        type: integer
+        description: Number of reads used to build statistics
+      fastq_screen_config:
+        type: string
+        description: Path to fastq screen configuration
+      aligner:
+        type: string
+        description: Aligner used to index references
+        pattern: "^bowtie2?"
 
-  tximport:
-    type: str
-    description: Optional parameters for tximport
+    tximport:
+      type: str
+      description: Optional parameters for tximport
 
-  fastqc:
-
-required:
-  - samples

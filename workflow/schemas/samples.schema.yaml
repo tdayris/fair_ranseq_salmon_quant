@@ -31,7 +31,6 @@ release:
 required:
   - sample_id
   - upstream_file
-  - downstream_file
   - species
   - build
   - release
