@@ -26,6 +26,10 @@ use rule salmon_decoy_sequences from salmon_tximport as fair_rnaseq_salmon_quant
     output:
         gentrome=temp("reference/sequences/{species}.{build}.{release}.gentrome.fasta"),
         decoys=temp("reference/sequences/{species}.{build}.{release}.decoys.txt"),
+    resources:
+        mem_mb=lambda wildcards, attempt: 512 * attempt,
+        runtime=lambda wildcards, attempt: 25 * attempt,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_decoy_sequences/{species}.{build}.{release}.log",
     benchmark:
@@ -57,6 +61,10 @@ use rule salmon_index_gentrome from salmon_tximport as fair_rnaseq_salmon_quant_
                 "versionInfo.json",
             )
         ),
+    resources:
+        mem_mb=lambda wildcards, attempt: 20 * 1024 * attempt,
+        runtime=lambda wildcards, attempt: 45 * attempt,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.log",
     benchmark:
@@ -96,6 +104,10 @@ use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_sal
                 "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{species}.{build}.{release}/{sample}/logs"
             )
         ),
+    resources:
+        mem_mb=lambda wildcards, attempt: 20 * 1024 * attempt,
+        runtime=lambda wildcards, attempt: 45 * attempt,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_quant_pair_ended_reads/{sample}.{species}.{build}.{release}.log",
     benchmark:
@@ -167,6 +179,10 @@ use rule tximport from salmon_tximport as fair_rnaseq_salmon_quant_tximport with
         txi=temp(
             "tmp/fair_rnaseq_salmon_quant/tximport/{species}.{build}.{release}/SummarizedExperimentObject.RDS"
         ),
+    resources:
+        mem_mb=lambda wildcards, attempt: 8 * 1024 * attempt,
+        runtime=lambda wildcards, attempt: 45 * attempt,
+        tmpdir=tmp,
     params:
         extra=lookup(dpath="params/tximport", within=config),
     log:
