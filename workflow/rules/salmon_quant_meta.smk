@@ -1,6 +1,6 @@
 module salmon_tximport:
     meta_wrapper:
-        "v3.4.0/meta/bio/salmon_tximport"
+        "v3.7.0/meta/bio/salmon_tximport"
     config:
         config
 
@@ -28,8 +28,8 @@ use rule salmon_decoy_sequences from salmon_tximport as fair_rnaseq_salmon_quant
         decoys=temp("reference/sequences/{species}.{build}.{release}.decoys.txt"),
     threads: 2
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * 1024 * 2,
-        runtime=lambda wildcards, attempt: attempt * 20,
+        mem_mb=lambda wildcards, attempt: 512 * attempt,
+        runtime=lambda wildcards, attempt: 25 * attempt,
         tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_decoy_sequences/{species}.{build}.{release}.log",
@@ -62,17 +62,17 @@ use rule salmon_index_gentrome from salmon_tximport as fair_rnaseq_salmon_quant_
                 "versionInfo.json",
             )
         ),
+    threads: 20
+    resources:
+        mem_mb=lambda wildcards, attempt: 20 * 1024 * attempt,
+        runtime=lambda wildcards, attempt: 45 * attempt,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.log",
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.tsv"
     params:
         extra=lookup(dpath="params/salmon/index", within=config),
-    threads: 20
-    resources:
-        mem_mb=lambda wildcards, attempt: attempt * 1024 * 12,
-        runtime=lambda wildcards, attempt: attempt * 50,
-        tmpdir=tmp,
 
 
 use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_salmon_quant_reads with:
@@ -108,8 +108,8 @@ use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_sal
         ),
     threads: 20
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * 1024 * 12,
-        runtime=lambda wildcards, attempt: attempt * 50,
+        mem_mb=lambda wildcards, attempt: 20 * 1024 * attempt,
+        runtime=lambda wildcards, attempt: 45 * attempt,
         tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_quant_pair_ended_reads/{sample}.{species}.{build}.{release}.log",
@@ -181,7 +181,7 @@ use rule tximport from salmon_tximport as fair_rnaseq_salmon_quant_tximport with
     threads: 1
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 1024 * 8,
-        runtime=lambda wildcards, attempt: attempt * 35,
+        runtime=lambda wildcards, attempt: attempt * 45,
         tmpdir=tmp,
     output:
         txi=temp(

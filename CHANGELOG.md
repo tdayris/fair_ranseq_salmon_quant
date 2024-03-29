@@ -9,6 +9,7 @@
 ## Fixes:
 
 * Documentation errors
+* Sample schema update, downstream_file is now required
 
 # 1.0.2
 
