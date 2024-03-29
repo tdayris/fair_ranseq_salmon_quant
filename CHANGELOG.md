@@ -1,15 +1,16 @@
-# 1.0.3
+# 1.1.0
 
 ## Features:
 
-* fair_fastqc_multiqc_pipeline update to 2.1.0
-* snakemake-wrappers update to 3.4.0
+* all configuration keys are now optional
+* fair_fastqc_multiqc_pipeline update to 2.2.3
+* fair_genome_indexer update to 3.4.0
+* snakemake-wrappers update to 3.7.0
 * MultiQC configuration file
 
 ## Fixes:
 
 * Documentation errors
-* Sample schema update, downstream_file is now required
 
 # 1.0.2
 
