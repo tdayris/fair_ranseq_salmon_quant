@@ -7,14 +7,7 @@ rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts:
                 within=samples,
             ),
         ),
-        tx2gene=getattr(
-            lookup(
-                query="species == '{species}' & release == '{release}' & build == '{build}'",
-                within=genomes,
-            ),
-            "id_to_gene",
-            "reference/annotation/{species}.{build}.{release}.id_to_gene.tsv",
-        ),
+        tx2gene=lambda wildcards: get_id2gene(wildcards),
     output:
         tsv=protected(
             "results/{species}.{build}.{release}/Quantification/{counts}.genes.tsv"
@@ -53,14 +46,7 @@ use rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts as fair_rnaseq_sa
                 within=samples,
             ),
         ),
-        tx2gene=getattr(
-            lookup(
-                query="species == '{species}' & release == '{release}' & build == '{build}'",
-                within=genomes,
-            ),
-            "id_to_gene",
-            "reference/annotation/{species}.{build}.{release}.t2g.tsv",
-        ),
+        tx2gene=lambda wildcards: get_tx2gene(wildcards),
     output:
         tsv=protected(
             "results/{species}.{build}.{release}/Quantification/{counts}.transcripts.tsv"

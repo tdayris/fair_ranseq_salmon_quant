@@ -7,18 +7,8 @@ module salmon_tximport:
 
 use rule salmon_decoy_sequences from salmon_tximport as fair_rnaseq_salmon_quant_salmon_decoy_sequences with:
     input:
-        transcriptome=dlookup(
-            query="species == '{species}' & release == '{release} & build == '{build}'",
-            within=genomes,
-            key="cdna_fasta",
-            default="reference/sequences/{species}.{build}.{release}.transcripts.fasta",
-        ),
-        genome=dlookup(
-            query="species == '{species}' & release == '{release} & build == '{build}'",
-            within=genomes,
-            key="dna_fasta",
-            default="reference/sequences/{species}.{build}.{release}.dna.fasta",
-        ),
+        transcriptome=lambda wildcards: get_transcripts_fasta(wildcards),
+        genome=lambda wildcards: get_dna_fasta(wildcards),
     output:
         gentrome=temp("reference/sequences/{species}.{build}.{release}.gentrome.fasta"),
         decoys=temp("reference/sequences/{species}.{build}.{release}.decoys.txt"),
@@ -60,8 +50,8 @@ use rule salmon_index_gentrome from salmon_tximport as fair_rnaseq_salmon_quant_
         ),
     threads: 20
     resources:
-        mem_mb=lambda wildcards, attempt: 20 * 1024 * attempt,
-        runtime=lambda wildcards, attempt: 45 * attempt,
+        mem_mb=lambda wildcards, attempt: 48 * 1024 * attempt,
+        runtime=lambda wildcards, attempt: 50 * attempt,
         tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.log",
