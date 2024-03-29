@@ -5,6 +5,11 @@ rule datavzrd_salmon_yaml:
         yaml=temp(
             "tmp/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.yaml"
         ),
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 1024,
+        runtime=lambda wildcards, attempt: attempt * 5,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.config.log",
     benchmark:
@@ -33,6 +38,11 @@ rule datavzrd_salmon_render:
                 "targets": "{targets}",
             },
         ),
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 1024,
+        runtime=lambda wildcards, attempt: attempt * 5,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/datavzrd/{species}.{build}.{release}/salmon/{counts}.{targets}.render.log",
     benchmark:
@@ -40,4 +50,4 @@ rule datavzrd_salmon_render:
     params:
         extra="",
     wrapper:
-        "v3.3.6/utils/datavzrd"
+        "v3.4.0/utils/datavzrd"

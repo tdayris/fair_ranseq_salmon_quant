@@ -1,14 +1,17 @@
 import csv
 import pandas
+import os
 import snakemake
 import snakemake.utils
 
 from collections import defaultdict
 from typing import Any
 
-snakemake.utils.min_version("7.29.0")
+snakemake.utils.min_version("8.1.0")
+
 
 container: "docker://snakemake/snakemake:v8.5.3"
+
 
 # Load and check configuration file
 configfile: "config/config.yaml"
@@ -67,6 +70,7 @@ build_list: list[str] = list(set(genomes.build.tolist()))
 species_list: list[str] = list(set(genomes.species.tolist()))
 datatype_list: list[str] = ["dna", "cdna", "gentrome"]
 stream_list: list[str] = ["1", "2"]
+tmp: str = f"{os.getcwd()}/tmp"
 
 
 wildcard_constraints:

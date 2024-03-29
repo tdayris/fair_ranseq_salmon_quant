@@ -1,5 +1,84 @@
-rule quantification_multiqc_report:
+rule fair_rnaseq_salmon_quant_multiqc_config:
+    output:
+        temp(
+            "tmp/fair_rnaseq_salmon_quant/{species}.{build}.{release}/multiqc_config.yaml"
+        ),
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 512,
+        runtime=lambda wildcards, attempt: attempt * 5,
+        tmpdir=tmp,
+    log:
+        "logs/fair_rnaseq_salmon_quant/multiqc_config/{species}.{build}.{release}.log",
+    benchmark:
+        "benchmark/fair_rnaseq_salmon_quant/multiqc_config/{species}.{build}.{release}.tsv"
+    params:
+        extra=lambda wildcards: {
+            "title": "RNA-Seq gene abundance estimation report",
+            "subtitle": "From raw fastq to decoy aware gene abundance estimation with Salmon",
+            "intro_text": (
+                f"This pipeline building this report has been "
+                f"fine tuned for {wildcards.species}.{wildcards.build}"
+                f".{wildcards.release}. The sequenced library is expected "
+                f"to be bulk RNA-Seq. Wet-lab experimental design was not "
+                f"considered."
+            ),
+            "report_comment": (
+                "This report was generated using: "
+                "https://github.com/tdayris/fair_rnaseq_salmon_quant"
+            ),
+            "show_analysis_paths": False,
+            "show_analysis_time": False,
+            "custom_logo": str(workflow.source_path("../../images/bigr_logo.png")),
+            "custom_logo_url": "https://www.gustaveroussy.fr/en",
+            "custom_logo_title": "Bioinformatics Platform @ Gustave Roussy",
+            "report_header_info": [
+                {"Contact E-mail": "bigr@gustaveroussy.fr"},
+                {"Applivation type": "Bulk RNA-Seq"},
+                {"Project Type": "Quantification (Abundance estimation)"},
+            ],
+            "software_versions": {
+                "Quality controls": {
+                    "fastqc": "1.12.1",
+                    "fastq_screen": "0.15.3",
+                    "bowtie2": "1.3.1",
+                    "multiqc": "1.20.0",
+                },
+                "Trimming": {
+                    "fastp": "0.23.4",
+                },
+                "Quantification": {
+                    "salmon": "1.10.2",
+                },
+                "Pipeline": {
+                    "snakemake": "8.5.3",
+                    "fair_rnaseq_salmon_quant": "1.0.3",
+                },
+            },
+            "disable_version_detection": True,
+            "run_modules": [
+                "fastqc",
+                "fastq_screen",
+                "salmon",
+                "fastp",
+            ],
+            "report_section_order": {
+                "fastqc": {"order": 1000},
+                "fastq_screen": {"before": "fastqc"},
+                "fastp": {"before": "fastq_screen"},
+                "salmon": {"before": "fastp"},
+                "software_versions": {"before": "salmon"},
+            },
+        },
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/fair_rnaseq_salmon_quant_multiqc_config.py"
+
+
+rule fair_rnaseq_salmon_quant_multiqc_report:
     input:
+        "tmp/fair_rnaseq_salmon_quant/{species}.{build}.{release}/multiqc_config.yaml",
         fastqc_single_ended=collect(
             "results/QC/report_pe/{sample.sample_id}_fastqc.zip",
             sample=lookup(
@@ -95,13 +174,13 @@ rule quantification_multiqc_report:
     resources:
         mem_mb=lambda wildcards, attempt: (2 * 1024) * attempt,
         runtime=lambda wildcards, attempt: int(60 * 0.5) * attempt,
-        tmpdir="tmp",
+        tmpdir=tmp,
     params:
-        extra=lookup(dpath="params/multiqc", within=config),
+        extra=lambda wildcards, input: f'{lookup(dpath="params/multiqc", within=config)} --config "{input[0]}"',
         use_input_files_only=True,
     log:
         "logs/fair_rnaseq_salmon_quant/multiqc/{species}.{build}.{release}.log",
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/multiqc/{species}.{build}.{release}.tsv"
     wrapper:
-        "v3.3.6/bio/multiqc"
+        "v3.4.0/bio/multiqc"

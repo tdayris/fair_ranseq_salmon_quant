@@ -19,11 +19,15 @@ rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts:
         tsv=protected(
             "results/{species}.{build}.{release}/Quantification/{counts}.genes.tsv"
         ),
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 1024 * 4,
+        runtime=lambda wildcards, attempt: attempt * 10,
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/aggregate_salmon_gene_counts/{species}.{build}.{release}/{counts}.genes.log",
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/aggregate_salmon_gene_counts/{species}.{build}.{release}/{counts}.genes.tsv"
-    threads: 1
     params:
         header=False,
         position=False,

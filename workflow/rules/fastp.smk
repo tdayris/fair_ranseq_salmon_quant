@@ -26,7 +26,7 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * 1024,
         runtime=lambda wildcards, attempt: attempt * 60,
-        tmpdir="tmp",
+        tmpdir=tmp,
     log:
         "logs/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.log",
     benchmark:
@@ -35,7 +35,7 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
         adapters=lookup(dpath="params/fastp/adapters", within=config),
         extra=lookup(dpath="params/fastp/extra", within=config),
     wrapper:
-        "v3.3.6/bio/fastp"
+        "v3.4.0/bio/fastp"
 
 
 use rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended as fair_rnaseq_salmon_quant_fastp_trimming_single_ended with:
