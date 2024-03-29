@@ -84,47 +84,6 @@ wildcard_constraints:
     stream=r"|".join(stream_list),
 
 
-def dlookup(
-    dpath: str | None = None,
-    query: str | None = None,
-    cols: list[str] | None = None,
-    within=None,
-    key: str | None = None,
-    default: str | dict[str, Any] | None = None,
-) -> str:
-    """
-    Allow default values and attribute getter in lookup function
-
-    Parameters:
-    dpath       str | None                  : Passed to lookup function
-    query       str | None                  : Passed to lookup function
-    cols        str | None                  : Passed to lookup function
-    within      object                      : Passed to lookup function
-    key         str                         : Attribute name
-    default     str | dict[str, Any] | None : Default value to return
-    """
-    value = None
-    try:
-        value = lookup(dpath=dpath, query=query, cols=cols, within=within)
-    except LookupError:
-        value = default
-    except WorkflowError:
-        value = default
-    except KeyError:
-        value = default
-    except AttributeError:
-        value = default
-
-    if key is not None:
-        return getattr(
-            value,
-            key,
-            default,
-        )
-
-    return value
-
-
 def lookup_config(
     dpath: str, default: str | None = None, config: dict[str, Any] = config
 ) -> str:
@@ -293,6 +252,7 @@ def get_tx2gene(
     )
     return lookup_genomes(wildcards, key="tx_to_gene", default=default)
 
+
 def get_id2gene(
     wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
 ) -> str:
@@ -400,11 +360,10 @@ def get_salmon_quant_reads_input(
 
     results: dict[str, str | list[str]] = {
         "index": ancient(salmon_index),
-        "gtf": dlookup(
-            query="species == '{species}' & build == '{build}' & release == '{release}'",
-            within=genomes,
+        "gtf": lookup_genomes(
+            wildcards=wildcards,
             key="gtf",
-            default="reference/annotation/{species}.{build}.{release}.gtf",
+            default=f"reference/annotation/{species}.{build}.{release}.gtf",
         ),
     }
 

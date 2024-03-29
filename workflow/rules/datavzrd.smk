@@ -50,4 +50,4 @@ rule datavzrd_salmon_render:
     params:
         extra="",
     wrapper:
-        "v3.7.0/utils/datavzrd"
+        f"{snakemake_wrappers_prefix}/utils/datavzrd"

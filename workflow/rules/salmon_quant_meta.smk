@@ -1,6 +1,6 @@
 module salmon_tximport:
     meta_wrapper:
-        "v3.7.0/meta/bio/salmon_tximport"
+        f"{snakemake_wrappers_prefix}/meta/bio/salmon_tximport"
     config:
         config
 
@@ -58,7 +58,7 @@ use rule salmon_index_gentrome from salmon_tximport as fair_rnaseq_salmon_quant_
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/salmon_index_gentrome/{species}.{build}.{release}.tsv"
     params:
-        extra=lookup(dpath="params/salmon/index", within=config),
+        extra=lookup_config(dpath="params/salmon/index"),
 
 
 use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_salmon_quant_reads with:
@@ -102,8 +102,8 @@ use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_sal
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/salmon_quant_pair_ended_reads/{sample}.{species}.{build}.{release}.tsv"
     params:
-        libtype=lookup(dpath="params/salmon/libtype", within=config),
-        extra=lookup(dpath="params/salmon/quant", within=config),
+        libtype=lookup_config(dpath="params/salmon/libtype"),
+        extra=lookup_config(dpath="params/salmon/quant"),
 
 
 use rule tximport from salmon_tximport as fair_rnaseq_salmon_quant_tximport with:
@@ -174,7 +174,7 @@ use rule tximport from salmon_tximport as fair_rnaseq_salmon_quant_tximport with
             "tmp/fair_rnaseq_salmon_quant/tximport/{species}.{build}.{release}/SummarizedExperimentObject.RDS"
         ),
     params:
-        extra=lookup(dpath="params/tximport", within=config),
+        extra=lookup_config(dpath="params/tximport", default=""),
     log:
         "logs/fair_rnaseq_salmon_quant/tximport/{species}.{build}.{release}.log",
     benchmark:

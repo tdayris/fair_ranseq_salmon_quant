@@ -185,4 +185,4 @@ rule fair_rnaseq_salmon_quant_multiqc_report:
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/multiqc/{species}.{build}.{release}.tsv"
     wrapper:
-        "v3.7.0/bio/multiqc"
+        f"{snakemake_wrappers_prefix}/bio/multiqc"
