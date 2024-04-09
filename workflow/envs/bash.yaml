@@ -3,3 +3,4 @@ channels:
   - nodefaults
 dependencies:
   - wget=1.20.3
+  - unzip=6.0

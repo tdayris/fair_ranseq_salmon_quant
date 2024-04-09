@@ -16,6 +16,7 @@ include: "rules/fastp.smk"
 include: "rules/merge_salmon.smk"
 include: "rules/multiqc.smk"
 include: "rules/salmon_quant_meta.smk"
+include: "rules/in_house_qc.smk"
 
 
 rule salmon_quant_target:

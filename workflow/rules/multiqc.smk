@@ -186,3 +186,36 @@ rule fair_rnaseq_salmon_quant_multiqc_report:
         "benchmark/fair_rnaseq_salmon_quant/multiqc/{species}.{build}.{release}.tsv"
     wrapper:
         f"{snakemake_wrappers_prefix}/bio/multiqc"
+
+
+rule fair_rnaseq_salmon_quant_unzip_multiqc_data:
+    input:
+        "results/{species}.{build}.{release}/QC/MultiQC_Quantification_data.zip",
+    output:
+        multiext(
+            "tmp/fair_rnaseq_salmon_quant/unzip_multiqc_data/{species}.{build}.{release}/multiqc_",
+            "citations.txt",
+            "data.json",
+            "fastp.txt",
+            "fastqc.txt",
+            "general_stats.txt",
+            "salmon.txt",
+            "software_versions.txt",
+            "sources.txt",
+        ),
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * 512,
+        runtime=lambda wildcards, attempt: attempt * 2,
+        tmpdir=tmp,
+    log:
+        "logs/fair_rnaseq_salmon_quant/unzip_mqc_data/{species}.{build}.{release}.log",
+    benchmark:
+        "benchmark/fair_rnaseq_salmon_quant/unzip_mqc_data/{species}.{build}.{release}.tsv"
+    params:
+        outdir=lambda wildcards, output: os.path.dirname(output[0]),
+        extra="-o",
+    conda:
+        "../envs/bash.yaml"
+    shell:
+        "unzip -d {params.outdir} {params.extra} {input} > {log} 2>&1"
