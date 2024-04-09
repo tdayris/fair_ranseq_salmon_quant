@@ -1,3 +1,18 @@
+# 1.2.0
+
+## Features:
+
+* rRNA ratio and Mitocholdrial ratio added to QC
+
+
+
+# 1.1.1
+
+## Features:
+
+* Resources reservation have been set accordingly to user requests
+* Documentation update
+
 # 1.1.0
 
 ## Features:
