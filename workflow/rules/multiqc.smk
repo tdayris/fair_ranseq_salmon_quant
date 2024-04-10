@@ -178,7 +178,7 @@ rule fair_rnaseq_salmon_quant_multiqc_report:
         runtime=lambda wildcards, attempt: int(60 * 0.5) * attempt,
         tmpdir=tmp,
     params:
-        extra=lambda wildcards, input: f'{lookup(dpath = "params/multiqc", within = config)} --config "{input[0]}"',
+        extra=lookup_config(dpath="params/fair_rnaseq_salmon_quant/multiqc", default=""),
         use_input_files_only=True,
     log:
         "logs/fair_rnaseq_salmon_quant/multiqc/{species}.{build}.{release}.log",
