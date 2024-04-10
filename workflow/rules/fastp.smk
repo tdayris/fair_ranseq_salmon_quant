@@ -24,7 +24,7 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
         ),
     threads: 5
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * 1024,
+        mem_mb=lambda wildcards, attempt: attempt * 1024 * 1.5,
         runtime=lambda wildcards, attempt: attempt * 60,
         tmpdir=tmp,
     log:
