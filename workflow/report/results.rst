@@ -41,4 +41,27 @@ find them directly on file system.
 Results
 =======
 
-Incoming description
+```
+results/
+├── QC
+│   ├── MultiQC_FastQC_data.zip                 # Raw fastq file quality tables
+│   ├── MultiQC_FastQC.html                     # Raw fastq file quality report
+│   └── report_pe
+│       ├── YYY_fastqc.zip                      # Per-sample quality table
+│       └── YYY.html                            # Per-sample quality report
+└── XXX
+    ├── QC
+    │   ├── Mitochodrial_ratio.png              # Mitochodrial ratio across samples
+    │   ├── MultiQC_Quantification_data.zip     # Complete pipeline statistics as TSV
+    │   ├── MultiQC_Quantification.html         # Quantification quality report
+    │   ├── rRNA_ratio.png                      # rRNA ratio across samples
+    │   └── Stats.csv.gz                        # (pseudo-)mapping statitstics
+    └── Quantification
+        ├── html_reports/                       # View counts in your web-browser
+        ├── Raw.genes.tsv                       # Raw gene abundance estimation
+        ├── Raw.transcripts.tsv                 # Raw transcripts abundance estimation
+        ├── TPM.genes.tsv                       # Normalized gene counts
+        └── TPM.transcripts.tsv                 # Normalized transcripts counts
+```
+
+
