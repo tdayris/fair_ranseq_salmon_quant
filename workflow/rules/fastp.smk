@@ -32,8 +32,8 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
     benchmark:
         "benchmark/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.tsv"
     params:
-        adapters=lookup(dpath="params/fastp/adapters", within=config),
-        extra=lookup(dpath="params/fastp/extra", within=config),
+        adapters=lookup_config(dpath="params/fastp/adapters", default=None),
+        extra=lookup_config(dpath="params/fastp/extra", default=""),
     wrapper:
         f"{snakemake_wrappers_prefix}/bio/fastp"
 
