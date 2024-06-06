@@ -1,7 +1,7 @@
 rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts:
     input:
         quant=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.genes.sf",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.genes.sf",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
@@ -18,9 +18,9 @@ rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts:
         runtime=lambda wildcards, attempt: attempt * 10,
         tmpdir=tmp,
     log:
-        "logs/fair_rnaseq_salmon_quant/aggregate_salmon_gene_counts/{species}.{build}.{release}/{counts}.genes.log",
+        "logs/fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts/{species}.{build}.{release}/{counts}.genes.log",
     benchmark:
-        "benchmark/fair_rnaseq_salmon_quant/aggregate_salmon_gene_counts/{species}.{build}.{release}/{counts}.genes.tsv"
+        "benchmark/fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts/{species}.{build}.{release}/{counts}.genes.tsv"
     params:
         header=False,
         position=False,
@@ -40,7 +40,7 @@ rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts:
 use rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts as fair_rnaseq_salmon_quant_aggregate_salmon_transcript_counts with:
     input:
         quant=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.sf",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.sf",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
@@ -52,9 +52,9 @@ use rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts as fair_rnaseq_sa
             "results/{species}.{build}.{release}/Quantification/{counts}.transcripts.tsv"
         ),
     log:
-        "logs/fair_rnaseq_salmon_quant/aggregate_salmon_transcript_counts/{species}.{build}.{release}.{counts}.log",
+        "logs/fair_rnaseq_salmon_quant_aggregate_salmon_transcript_counts/{species}.{build}.{release}.{counts}.log",
     benchmark:
-        "benchmark/fair_rnaseq_salmon_quant/aggregate_salmon_transcript_counts/{species}.{build}.{release}.{counts}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant_aggregate_salmon_transcript_counts/{species}.{build}.{release}.{counts}.tsv"
     params:
         header=False,
         position=False,

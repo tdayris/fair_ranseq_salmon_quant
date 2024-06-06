@@ -17,6 +17,7 @@ include: "rules/merge_salmon.smk"
 include: "rules/multiqc.smk"
 include: "rules/salmon_quant_meta.smk"
 include: "rules/in_house_qc.smk"
+include: "rules/in_house_pca.smk"
 
 
 rule salmon_quant_target:
@@ -33,7 +34,7 @@ rule salmon_quant_target:
     log:
         "logs/target/salmon_quant_target.log",
     benchmark:
-        "logs/target/salmon_quant_target.tsv"
+        "benchmark/target/salmon_quant_target.tsv"
     params:
         genomes=genomes.copy(),
     conda:

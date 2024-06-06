@@ -8,10 +8,10 @@ import snakemake.utils
 from collections import defaultdict
 from typing import Any
 
-snakemake.utils.min_version("8.1.0")
+snakemake.utils.min_version("8.5.3")
 
 
-container: "docker://snakemake/snakemake:v8.5.3"
+container: "docker://snakemake/snakemake:v8.11.6"
 
 
 # Load and check configuration file
@@ -72,7 +72,7 @@ species_list: list[str] = list(set(genomes.species.tolist()))
 datatype_list: list[str] = ["dna", "cdna", "gentrome"]
 stream_list: list[str] = ["1", "2"]
 tmp: str = f"{os.getcwd()}/tmp"
-snakemake_wrappers_prefix: str = "v3.7.0"
+snakemake_wrappers_prefix: str = "v3.10.1"
 
 
 wildcard_constraints:
@@ -239,6 +239,20 @@ def select_fai(
     )
 
 
+def get_gtf(
+    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
+) -> str:
+    """
+    Return path to the final genome annotation
+    """
+    default: str = (
+        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}.gtf".format(
+            wildcards=wildcards
+        )
+    )
+    return lookup_genomes(wildcards, key="gtf", default=default, genomes=genomes)
+
+
 def get_tx2gene(
     wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
 ) -> str:
@@ -369,14 +383,14 @@ def get_salmon_quant_reads_input(
 
     if downstream_file or not pandas.isna(downstream_file):
         results["r1"] = (
-            f"tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{wildcards.sample}.1.fastq.gz"
+            f"tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{wildcards.sample}.1.fastq.gz"
         )
         results["r2"] = (
-            f"tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{wildcards.sample}.2.fastq.gz"
+            f"tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{wildcards.sample}.2.fastq.gz"
         )
     else:
         results["r"] = (
-            f"tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{wildcards.sample}.fastq.gz"
+            f"tmp/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{wildcards.sample}.fastq.gz"
         )
 
     return results

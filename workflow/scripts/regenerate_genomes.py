@@ -11,7 +11,7 @@ import pandas
 
 def replace_col(df: pandas.DataFrame, column: str, default: str) -> pandas.DataFrame:
     """
-    Replace null values and unreachable paths 
+    Replace null values and unreachable paths
     in a given column with provided defaults.
 
     Parameters:

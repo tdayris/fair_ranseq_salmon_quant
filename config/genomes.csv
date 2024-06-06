@@ -1,4 +1,5 @@
 species,build,release
-homo_sapiens,GRCh38,111
-mus_musculus,GRCm39,111
+homo_sapiens,GRCh38,109
+mus_musculus,GRCm39,109
 mus_musculus,GRCm38,102
+saccharomyces_cerevisiae,R64-1-1,111

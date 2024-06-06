@@ -1,6 +1,6 @@
 rule fair_rnaseq_salmon_quant_multiqc_config:
     input:
-        "tmp/fair_fastqc_multiqc/bigr_logo.png",
+        "tmp/fair_fastqc_multiqc_bigr_logo.png",
     output:
         temp(
             "tmp/fair_rnaseq_salmon_quant/{species}.{build}.{release}/multiqc_config.yaml"
@@ -43,18 +43,29 @@ rule fair_rnaseq_salmon_quant_multiqc_config:
                 "Quality controls": {
                     "fastqc": "1.12.1",
                     "fastq_screen": "0.15.3",
-                    "bowtie2": "1.3.1",
-                    "multiqc": "1.20.0",
+                    "bowtie1": "1.3.1",
+                    "bowtie2": "2.5.2",
+                    "multiqc": "1.21.0",
+                    "deeptools": "3.5.5",
+                    "python": "3.12.0",
+                    "seaborn": "0.13.2",
+                    "pyyaml": "6.0.1",
+                    "pandas": "2.1.3",
+                    "agat": "1.2.0",
                 },
                 "Trimming": {
                     "fastp": "0.23.4",
                 },
                 "Quantification": {
-                    "salmon": "1.10.2",
+                    "salmon": "1.10.3",
+                    "gzip": "1.13",
+                    "pzip2": "1.0.8",
                 },
                 "Pipeline": {
                     "snakemake": "8.5.3",
-                    "fair_rnaseq_salmon_quant": "1.0.3",
+                    "fair_genome_indexer": "3.5.0",
+                    "fair_fastqc_multiqc": "2.2.8",
+                    "fair_rnaseq_salmon_quant": "1.1.0",
                 },
             },
             "disable_version_detection": True,
@@ -63,13 +74,15 @@ rule fair_rnaseq_salmon_quant_multiqc_config:
                 "fastq_screen",
                 "salmon",
                 "fastp",
+                "deeptools",
             ],
             "report_section_order": {
                 "fastqc": {"order": 1000},
                 "fastq_screen": {"before": "fastqc"},
                 "fastp": {"before": "fastq_screen"},
                 "salmon": {"before": "fastp"},
-                "software_versions": {"before": "salmon"},
+                "deeptools": {"before": "salmon"},
+                "software_versions": {"before": "deeptools"},
             },
         },
     conda:
@@ -97,63 +110,63 @@ rule fair_rnaseq_salmon_quant_multiqc_report:
             stream=stream_list,
         ),
         fastp_pe_json=expand(
-            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample.sample_id}.json",
+            "tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{sample.sample_id}.json",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}' & downstream_file == downstream_file",
                 within=samples,
             ),
         ),
         fastp_se_json=expand(
-            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample.sample_id}.json",
+            "tmp/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{sample.sample_id}.json",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}' & downstream_file != downstream_file",
                 within=samples,
             ),
         ),
         quant=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.sf",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.sf",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
             ),
         ),
         quant_genes=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.genes.sf",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/quant.genes.sf",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
             ),
         ),
         lib=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/lib_format_counts.json",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/lib_format_counts.json",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
             ),
         ),
         aux_info=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/aux_info",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/aux_info",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
             ),
         ),
         cmd_info=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/cmd_info.json",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/cmd_info.json",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
             ),
         ),
         libparams=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/libParams",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/libParams",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
             ),
         ),
         logs=expand(
-            "tmp/fair_rnaseq_salmon_quant/salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/logs",
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/logs",
             sample=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=samples,
@@ -178,7 +191,10 @@ rule fair_rnaseq_salmon_quant_multiqc_report:
         runtime=lambda wildcards, attempt: int(60 * 0.5) * attempt,
         tmpdir=tmp,
     params:
-        extra=lookup_config(dpath="params/fair_rnaseq_salmon_quant/multiqc", default=""),
+        extra=lookup_config(
+            dpath="params/fair_rnaseq_salmon_quant/multiqc",
+            default="--verbose --no-megaqc-upload --no-ansi --force",
+        ),
         use_input_files_only=True,
     log:
         "logs/fair_rnaseq_salmon_quant/multiqc/{species}.{build}.{release}.log",
@@ -214,7 +230,7 @@ rule fair_rnaseq_salmon_quant_unzip_multiqc_data:
         "benchmark/fair_rnaseq_salmon_quant/unzip_mqc_data/{species}.{build}.{release}.tsv"
     params:
         outdir=lambda wildcards, output: os.path.dirname(output[0]),
-        extra="-o",
+        extra=lookup_config(dpath="params/fair_rnaseq_salmon_quant/unzip", default="-o"),
     conda:
         "../envs/bash.yaml"
     shell:

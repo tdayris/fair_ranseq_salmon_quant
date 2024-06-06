@@ -1,14 +1,14 @@
 rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
     input:
         sample=expand(
-            "tmp/fair_fastqc_multiqc/link_or_concat_pair_ended_input/{sample}.{stream}.fastq.gz",
+            "tmp/fair_fastqc_multiqc_link_or_concat_pair_ended_input/{sample}.{stream}.fastq.gz",
             stream=stream_list,
             allow_missing=True,
         ),
     output:
         trimmed=temp(
             expand(
-                "tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.{stream}.fastq.gz",
+                "tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{sample}.{stream}.fastq.gz",
                 stream=stream_list,
                 allow_missing=True,
             )
@@ -20,7 +20,7 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
             subcategory="Trimming",
         ),
         json=temp(
-            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.json"
+            "tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{sample}.json"
         ),
     threads: 5
     resources:
@@ -28,12 +28,16 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
         runtime=lambda wildcards, attempt: attempt * 60,
         tmpdir=tmp,
     log:
-        "logs/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.log",
+        "logs/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{sample}.log",
     benchmark:
-        "benchmark/fair_rnaseq_salmon_quant/fastp_trimming_pair_ended/{sample}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{sample}.tsv"
     params:
-        adapters=lookup_config(dpath="params/fastp/adapters", default=None),
-        extra=lookup_config(dpath="params/fastp/extra", default=""),
+        adapters=lookup_config(
+            dpath="params/fair_rnaseq_salmon_quant_fastp/adapters", default=None
+        ),
+        extra=lookup_config(
+            dpath="params/fair_rnaseq_salmon_quant_fastp/extra", default=""
+        ),
     wrapper:
         f"{snakemake_wrappers_prefix}/bio/fastp"
 
@@ -41,20 +45,20 @@ rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended:
 use rule fair_rnaseq_salmon_quant_fastp_trimming_pair_ended as fair_rnaseq_salmon_quant_fastp_trimming_single_ended with:
     input:
         sample=expand(
-            "tmp/fair_fastqc_multiqc/link_or_concat_single_ended_input/{sample}.fastq.gz",
+            "tmp/fair_fastqc_multiqc_link_or_concat_single_ended_input/{sample}.fastq.gz",
             allow_missing=True,
         ),
     output:
         trimmed=temp(
-            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.fastq.gz"
+            "tmp/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{sample}.fastq.gz"
         ),
         html=temp(
-            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.html"
+            "tmp/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{sample}.html"
         ),
         json=temp(
-            "tmp/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.json"
+            "tmp/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{sample}.json"
         ),
     log:
-        "logs/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.log",
+        "logs/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{sample}.log",
     benchmark:
-        "benchmark/fair_rnaseq_salmon_quant/fastp_trimming_single_ended/{sample}.tsv"
+        "benchmark/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{sample}.tsv"

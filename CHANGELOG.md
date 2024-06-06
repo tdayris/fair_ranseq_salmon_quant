@@ -1,9 +1,17 @@
+# 1.2.1
+
+## Features:
+
+* Snakemake wrappers up to 3.10.1
+* fair_genome_indexer up to 3.4.4
+* fair_fastqc_multiqc up to 2.2.7
+* log, benchmark, and temp files renamed to follow rule names
+
 # 1.2.0
 
 ## Features:
 
 * rRNA ratio and Mitocholdrial ratio added to QC
-
 
 
 # 1.1.1
