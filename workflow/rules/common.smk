@@ -111,132 +111,12 @@ def lookup_genomes(
     """
     Run lookup function with default parameters in order to search user-provided sequence/annotation files
     """
-    query: str = (
+    query = str(
         "species == '{wildcards.species}' & build == '{wildcards.build}' & release == '{wildcards.release}'".format(
             wildcards=wildcards
         )
     )
     return getattr(lookup(query=query, within=genomes), key, default)
-
-
-def get_dna_fasta(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Return path to the final DNA fasta sequences
-    """
-    default: str = (
-        "reference/sequences/{wildcards.species}.{wildcards.build}.{wildcards.release}.dna.fasta".format(
-            wildcards=wildcards
-        )
-    )
-    return lookup_genomes(wildcards, key="dna_fasta", default=default, genomes=genomes)
-
-
-def get_cdna_fasta(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Return path to the final cDNA fasta sequences
-    """
-    default: str = (
-        "reference/sequences/{wildcards.species}.{wildcards.build}.{wildcards.release}.cdna.fasta".format(
-            wildcards=wildcards
-        )
-    )
-    return lookup_genomes(wildcards, key="cdna_fasta", default=default, genomes=genomes)
-
-
-def get_transcripts_fasta(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Return path to the final cDNA transcripts fasta sequences
-    """
-    default: str = (
-        "reference/sequences/{wildcards.species}.{wildcards.build}.{wildcards.release}.transcripts.fasta".format(
-            wildcards=wildcards
-        )
-    )
-    return lookup_genomes(
-        wildcards, key="transcripts_fasta", default=default, genomes=genomes
-    )
-
-
-def select_fasta(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Evaluates the {datatype} wildcard, and return the right fasta file
-    """
-    return branch(
-        condition=str(wildcards.datatype).lower(),
-        cases={
-            "dna": get_dna_fasta(wildcards),
-            "cdna": get_cdna_fasta(wildcards),
-            "transcripts": get_transcripts_fasta(wildcards),
-        },
-    )
-
-
-def get_dna_fai(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Return path to the final DNA fasta sequences index
-    """
-    default: str = (
-        "reference/sequences/{wildcards.species}.{wildcards.build}.{wildcards.release}.dna.fasta.fai".format(
-            wildcards=wildcards
-        )
-    )
-    return lookup_genomes(wildcards, key="dna_fai", default=default, genomes=genomes)
-
-
-def get_cdna_fai(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Return path to the final cDNA fasta sequences index
-    """
-    default: str = (
-        "reference/sequences/{wildcards.species}.{wildcards.build}.{wildcards.release}.cdna.fasta.fai".format(
-            wildcards=wildcards
-        )
-    )
-    return lookup_genomes(wildcards, key="cdna_fai", default=default, genomes=genomes)
-
-
-def get_transcripts_fai(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Return path to the final cDNA transcripts fasta sequences index
-    """
-    default: str = (
-        "reference/sequences/{wildcards.species}.{wildcards.build}.{wildcards.release}.transcripts.fasta.fai".format(
-            wildcards=wildcards
-        )
-    )
-    return lookup_genomes(
-        wildcards, key="transcripts_fai", default=default, genomes=genomes
-    )
-
-
-def select_fai(
-    wildcards: snakemake.io.Wildcards, genomes: pandas.DataFrame = genomes
-) -> str:
-    """
-    Evaluates the {datatype} wildcard, and return the right fasta index file
-    """
-    return branch(
-        condition=str(wildcards.datatype).lower(),
-        cases={
-            "dna": get_dna_fai(wildcards),
-            "cdna": get_cdna_fai(wildcards),
-            "transcripts": get_transcripts_fai(wildcards),
-        },
-    )
 
 
 def get_gtf(
@@ -245,8 +125,8 @@ def get_gtf(
     """
     Return path to the final genome annotation
     """
-    default: str = (
-        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}.gtf".format(
+    default = str(
+        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}/{wildcards.species}.{wildcards.build}.{wildcards.release}.gtf".format(
             wildcards=wildcards
         )
     )
@@ -259,8 +139,8 @@ def get_tx2gene(
     """
     Return path to final tx2gene table
     """
-    default: str = (
-        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}.t2g.tsv".format(
+    default = str(
+        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}/{wildcards.species}.{wildcards.build}.{wildcards.release}.t2g.tsv".format(
             wildcards=wildcards
         )
     )
@@ -273,8 +153,8 @@ def get_id2gene(
     """
     Return path to final id2gene table
     """
-    default: str = (
-        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}.id_to_gene.tsv".format(
+    default = str(
+        "reference/annotation/{wildcards.species}.{wildcards.build}.{wildcards.release}/{wildcards.species}.{wildcards.build}.{wildcards.release}.id_to_gene.tsv".format(
             wildcards=wildcards
         )
     )
@@ -374,11 +254,7 @@ def get_salmon_quant_reads_input(
 
     results: dict[str, str | list[str]] = {
         "index": ancient(salmon_index),
-        "gtf": lookup_genomes(
-            wildcards=wildcards,
-            key="gtf",
-            default=f"reference/annotation/{species}.{build}.{release}.gtf",
-        ),
+        "gtf": get_gtf(wildcards),
     }
 
     if downstream_file or not pandas.isna(downstream_file):

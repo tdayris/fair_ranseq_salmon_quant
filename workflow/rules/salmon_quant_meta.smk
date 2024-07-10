@@ -5,62 +5,6 @@ module salmon_tximport:
         config
 
 
-use rule salmon_decoy_sequences from salmon_tximport as fair_rnaseq_salmon_quant_salmon_decoy_sequences with:
-    input:
-        transcriptome=lambda wildcards: get_transcripts_fasta(wildcards),
-        genome=lambda wildcards: get_dna_fasta(wildcards),
-    output:
-        gentrome=temp("reference/sequences/{species}.{build}.{release}.gentrome.fasta"),
-        decoys=temp("reference/sequences/{species}.{build}.{release}.decoys.txt"),
-    threads: 2
-    resources:
-        mem_mb=lambda wildcards, attempt: 512 * attempt,
-        runtime=lambda wildcards, attempt: 25 * attempt,
-        tmpdir=tmp,
-    log:
-        "logs/fair_rnaseq_salmon_quant_salmon_decoy_sequences/{species}.{build}.{release}.log",
-    benchmark:
-        "benchmark/fair_rnaseq_salmon_quant_salmon_decoy_sequences/{species}.{build}.{release}.tsv"
-
-
-use rule salmon_index_gentrome from salmon_tximport as fair_rnaseq_salmon_quant_salmon_index_gentrome with:
-    input:
-        sequences="reference/sequences/{species}.{build}.{release}.gentrome.fasta",
-        decoys="reference/sequences/{species}.{build}.{release}.decoys.txt",
-    output:
-        temp(
-            multiext(
-                "reference/salmon_index/{species}.{build}.{release}/{species}.{build}.{release}/",
-                "complete_ref_lens.bin",
-                "ctable.bin",
-                "ctg_offsets.bin",
-                "duplicate_clusters.tsv",
-                "info.json",
-                "mphf.bin",
-                "pos.bin",
-                "pre_indexing.log",
-                "rank.bin",
-                "refAccumLengths.bin",
-                "ref_indexing.log",
-                "reflengths.bin",
-                "refseq.bin",
-                "seq.bin",
-                "versionInfo.json",
-            )
-        ),
-    threads: 20
-    resources:
-        mem_mb=lambda wildcards, attempt: 48 * 1024 * attempt,
-        runtime=lambda wildcards, attempt: 50 * attempt,
-        tmpdir=tmp,
-    log:
-        "logs/fair_rnaseq_salmon_quant_salmon_index_gentrome/{species}.{build}.{release}.log",
-    benchmark:
-        "benchmark/fair_rnaseq_salmon_quant_salmon_index_gentrome/{species}.{build}.{release}.tsv"
-    params:
-        extra=lookup_config(dpath="params/salmon/index", default=""),
-
-
 use rule salmon_quant_reads from salmon_tximport as fair_rnaseq_salmon_quant_salmon_quant_reads with:
     input:
         unpack(get_salmon_quant_reads_input),
@@ -161,7 +105,7 @@ use rule tximport from salmon_tximport as fair_rnaseq_salmon_quant_tximport with
             ),
         ),
         tx_to_gene=expand(
-            "reference/annotation/{genome.species}.{genome.build}.{genome.release}.id_to_gene.tsv",
+            "reference/annotation/{genome.species}.{genome.build}.{genome.release}/{genome.species}.{genome.build}.{genome.release}.id_to_gene.tsv",
             genome=lookup(
                 query="species == '{species}' & build == '{build}' & release == '{release}'",
                 within=genomes,

@@ -1,3 +1,11 @@
+# 1.2.2
+
+## Features:
+
+* Snakemake wrappers up to 3.13.6
+* fair_genome_indexer up to 3.8.0
+* fair_fastqc_multiqc up to 2.3.5
+
 # 1.2.1
 
 ## Features:
