@@ -258,14 +258,14 @@ def get_salmon_quant_reads_input(
     }
 
     if downstream_file or not pandas.isna(downstream_file):
-        results["r1"] = (
+        results["r1"] = str(
             f"tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{wildcards.sample}.1.fastq.gz"
         )
-        results["r2"] = (
+        results["r2"] = str(
             f"tmp/fair_rnaseq_salmon_quant_fastp_trimming_pair_ended/{wildcards.sample}.2.fastq.gz"
         )
     else:
-        results["r"] = (
+        results["r"] = str(
             f"tmp/fair_rnaseq_salmon_quant_fastp_trimming_single_ended/{wildcards.sample}.fastq.gz"
         )
 
