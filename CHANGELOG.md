@@ -1,3 +1,11 @@
+# 1.2.3
+
+## Features:
+
+* Snakemake wrappers up to 3.13.7
+* fair_genome_indexer up to 3.8.1
+* Allow local modules and wrappers
+
 # 1.2.2
 
 ## Features:

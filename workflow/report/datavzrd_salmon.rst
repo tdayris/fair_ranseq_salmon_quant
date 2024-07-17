@@ -6,4 +6,4 @@ connexion to open this file.
 These counts were estimated using Salmon_.
 
 .. _HTML: https://en.wikipedia.org/wiki/HTML
-.. _Salmon: https://snakemake-wrappers.readthedocs.io/en/v3.10.1/wrappers/salmon/quant.html
+.. _Salmon: https://snakemake-wrappers.readthedocs.io/en/v3.13.7/wrappers/salmon/quant.html

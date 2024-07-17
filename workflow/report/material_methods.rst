@@ -1,4 +1,4 @@
-Matierial and methods
+Material and methods
 =====================
 
 Genome information was download from Ensembl. Samtools_ [#samtoolspaper]_ 
@@ -27,11 +27,11 @@ usage, and resutls can be found on the `Snakemake workflow`_ page.
 .. _Snakemake: https://snakemake.readthedocs.io
 .. _Github: https://github.com/tdayris/fair_rnaseq_salmon_quant
 .. _`Snakemake workflow`: https://snakemake.github.io/snakemake-workflow-catalog?usage=tdayris/fair_rnaseq_salmon_quant
-.. _Picard: https://snakemake-wrappers.readthedocs.io/en/v3.10.1/wrappers/picard/createsequencedictionary.html
-.. _Samtools: https://snakemake-wrappers.readthedocs.io/en/v3.10.1/wrappers/samtools/faidx.html
+.. _Picard: https://snakemake-wrappers.readthedocs.io/en/v3.13.7/wrappers/picard/createsequencedictionary.html
+.. _Samtools: https://snakemake-wrappers.readthedocs.io/en/v3.13.7/wrappers/samtools/faidx.html
 .. _Agat: https://agat.readthedocs.io/en/latest/index.html
-.. _Salmon: https://snakemake-wrappers.readthedocs.io/en/v3.10.1/wrappers/salmon.html
+.. _Salmon: https://snakemake-wrappers.readthedocs.io/en/v3.13.7/wrappers/salmon.html
 .. _`decoy-aware gentrome`: https://salmon.readthedocs.io/en/latest/salmon.html#preparing-transcriptome-indices-mapping-based-mode
-.. _Fastp: https://snakemake-wrappers.readthedocs.io/en/v3.10.1/wrappers/fastp.html
+.. _Fastp: https://snakemake-wrappers.readthedocs.io/en/v3.13.7/wrappers/fastp.html
 .. _fastq: https://fr.wikipedia.org/wiki/FASTQ
-.. _tximport: https://snakemake-wrappers.readthedocs.io/en/v3.10.1/wrappers/tximport.html
+.. _tximport: https://snakemake-wrappers.readthedocs.io/en/v3.13.7/wrappers/tximport.html

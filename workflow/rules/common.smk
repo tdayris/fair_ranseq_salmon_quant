@@ -11,7 +11,7 @@ from typing import Any
 snakemake.utils.min_version("8.5.3")
 
 
-container: "docker://snakemake/snakemake:v8.11.6"
+container: "docker://snakemake/snakemake:v8.16.0"
 
 
 # Load and check configuration file
@@ -72,7 +72,7 @@ species_list: list[str] = list(set(genomes.species.tolist()))
 datatype_list: list[str] = ["dna", "cdna", "gentrome"]
 stream_list: list[str] = ["1", "2"]
 tmp: str = f"{os.getcwd()}/tmp"
-snakemake_wrappers_prefix: str = "v3.10.1"
+snakemake_wrappers_prefix: str = "v3.13.7"
 
 
 wildcard_constraints:
