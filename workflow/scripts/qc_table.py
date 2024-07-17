@@ -1,13 +1,18 @@
 # coding: utf-8
 
+import json
 import logging
 import pandas
 
+from pathlib import Path, PurePath
 from typing import Any
 
 
 def read_salmon_qc(path: str) -> pandas.DataFrame:
     """
+    !WARNING! Legacy
+    MultiQC update does not return this file anymore.
+
     Return MultiQC stat table as a data frame
 
     Parameters:
@@ -33,6 +38,32 @@ def read_salmon_qc(path: str) -> pandas.DataFrame:
     return mqc
 
 
+def read_salmon_auxdir(paths: list[str | Path]) -> pandas.DataFrame:
+    """
+    Search for meta_info.json files and load them
+    """
+    frag_length = {}
+    for path in paths:
+        if isinstance(path, str):
+            path = Path(path) / "meta_info.json"
+
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Could not find Salmon's meta_json file at {path}"
+            )
+
+        with path.open() as json_stream:
+            meta_json = json.load(json_stream)
+
+        sample_id = PurePath(path).parts[-3]
+        frag_length[sample_id] = {
+            "Salmon_version": meta_json["salmon_version"],
+            "Salmon_Mean_fragment_length": meta_json["frag_length_mean"],
+            "Salmon_Fragment_length_sd": meta_json["frag_length_sd"]
+        }
+    return pandas.DataFrame.from_dict(frag_length, orient="index")
+        
+
 def read_general_stat_table(
     path: str, samples_to_keep: list[str] | pandas.Series
 ) -> pandas.DataFrame:
@@ -55,13 +86,13 @@ def read_general_stat_table(
     mqc = mqc[mqc.index.isin(samples_to_keep)]
     mqc = mqc[
         [
-            "Salmon_mqc-generalstats-salmon-percent_mapped",
-            "Salmon_mqc-generalstats-salmon-num_mapped",
-            "Salmon_mqc-generalstats-salmon-library_types",
-            "Salmon_mqc-generalstats-salmon-strand_mapping_bias",
-            "fastp_mqc-generalstats-fastp-after_filtering_gc_content",
-            "fastp_mqc-generalstats-fastp-pct_adapter",
-            "fastp_mqc-generalstats-fastp-filtering_result_passed_filter_reads",
+            "Salmon_mqc_generalstats_salmon_percent_mapped",
+            "Salmon_mqc_generalstats_salmon_num_mapped",
+            "Salmon_mqc_generalstats_salmon_library_types",
+            "Salmon_mqc_generalstats_salmon_strand_mapping_bias",
+            "fastp_mqc_generalstats_fastp_after_filtering_gc_content",
+            "fastp_mqc_generalstats_fastp_pct_adapter",
+            "fastp_mqc_generalstats_fastp_filtering_result_passed_filter_reads",
         ]
     ]
     mqc.columns = [
@@ -128,7 +159,8 @@ if __name__ == "__main__":
     logging.getLogger("PIL.PngImagePlugin").disabled = True
 
     # Loading data, and building stats table
-    salmon: pandas.DataFrame = read_salmon_qc(path=snakemake.input.salmon)
+    #salmon: pandas.DataFrame = read_salmon_qc(path=snakemake.input.salmon)
+    salmon: pandas.DataFrame = read_salmon_auxdir(paths=snakemake.input.salmon)
     general: pandas.DataFrame = read_general_stat_table(
         path=snakemake.input.general, samples_to_keep=salmon.index.tolist()
     )

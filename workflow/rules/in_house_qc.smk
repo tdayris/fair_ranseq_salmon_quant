@@ -25,8 +25,11 @@ rule fair_rnaseq_salmon_quant_qc_table:
     input:
         mito="tmp/fair_rnaseq_salmon_quant/mito_rrna_percents/{species}.{build}.{release}/mito.csv",
         rrna="tmp/fair_rnaseq_salmon_quant/mito_rrna_percents/{species}.{build}.{release}/rrna.csv",
-        salmon="tmp/fair_rnaseq_salmon_quant/unzip_multiqc_data/{species}.{build}.{release}/multiqc_salmon.txt",
         general="tmp/fair_rnaseq_salmon_quant/unzip_multiqc_data/{species}.{build}.{release}/multiqc_general_stats.txt",
+        salmon=collect(
+            "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/aux_info",
+            sample=lookup(query="species == '{species}' & build == '{build}' & release == '{release}'", within=samples),
+        ),
     output:
         stats="results/{species}.{build}.{release}/QC/Stats.csv.gz",
     threads: 1
