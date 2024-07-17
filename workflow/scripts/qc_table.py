@@ -48,9 +48,7 @@ def read_salmon_auxdir(paths: list[str | Path]) -> pandas.DataFrame:
             path = Path(path) / "meta_info.json"
 
         if not path.exists():
-            raise FileNotFoundError(
-                f"Could not find Salmon's meta_json file at {path}"
-            )
+            raise FileNotFoundError(f"Could not find Salmon's meta_json file at {path}")
 
         with path.open() as json_stream:
             meta_json = json.load(json_stream)
@@ -59,10 +57,10 @@ def read_salmon_auxdir(paths: list[str | Path]) -> pandas.DataFrame:
         frag_length[sample_id] = {
             "Salmon_version": meta_json["salmon_version"],
             "Salmon_Mean_fragment_length": meta_json["frag_length_mean"],
-            "Salmon_Fragment_length_sd": meta_json["frag_length_sd"]
+            "Salmon_Fragment_length_sd": meta_json["frag_length_sd"],
         }
     return pandas.DataFrame.from_dict(frag_length, orient="index")
-        
+
 
 def read_general_stat_table(
     path: str, samples_to_keep: list[str] | pandas.Series
@@ -159,7 +157,7 @@ if __name__ == "__main__":
     logging.getLogger("PIL.PngImagePlugin").disabled = True
 
     # Loading data, and building stats table
-    #salmon: pandas.DataFrame = read_salmon_qc(path=snakemake.input.salmon)
+    # salmon: pandas.DataFrame = read_salmon_qc(path=snakemake.input.salmon)
     salmon: pandas.DataFrame = read_salmon_auxdir(paths=snakemake.input.salmon)
     general: pandas.DataFrame = read_general_stat_table(
         path=snakemake.input.general, samples_to_keep=salmon.index.tolist()

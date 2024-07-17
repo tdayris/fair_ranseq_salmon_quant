@@ -28,7 +28,10 @@ rule fair_rnaseq_salmon_quant_qc_table:
         general="tmp/fair_rnaseq_salmon_quant/unzip_multiqc_data/{species}.{build}.{release}/multiqc_general_stats.txt",
         salmon=collect(
             "tmp/fair_rnaseq_salmon_quant_salmon_quant_reads/{sample.species}.{sample.build}.{sample.release}/{sample.sample_id}/aux_info",
-            sample=lookup(query="species == '{species}' & build == '{build}' & release == '{release}'", within=samples),
+            sample=lookup(
+                query="species == '{species}' & build == '{build}' & release == '{release}'",
+                within=samples,
+            ),
         ),
     output:
         stats="results/{species}.{build}.{release}/QC/Stats.csv.gz",
