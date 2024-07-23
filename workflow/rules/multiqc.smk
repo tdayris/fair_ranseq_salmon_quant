@@ -19,14 +19,14 @@ rule fair_rnaseq_salmon_quant_multiqc_config:
             "title": "RNA-Seq gene abundance estimation report",
             "subtitle": "From raw fastq to decoy aware gene abundance estimation with Salmon",
             "intro_text": (
-                f"This pipeline building this report has been "
+            f"This pipeline building this report has been "
                 f"fine tuned for {wildcards.species}.{wildcards.build}"
                 f".{wildcards.release}. The sequenced library is expected "
                 f"to be bulk RNA-Seq. Wet-lab experimental design was not "
                 f"considered."
             ),
             "report_comment": (
-                "This report was generated using: "
+            "This report was generated using: "
                 "https://github.com/tdayris/fair_rnaseq_salmon_quant"
             ),
             "show_analysis_paths": False,
