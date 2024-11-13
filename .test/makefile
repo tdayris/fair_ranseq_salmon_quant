@@ -48,7 +48,7 @@ report.txt: pipeline.txt
 pipeline.txt: linter.txt format.txt black.txt
 	snakemake -s ../workflow/Snakefile \
 		--cores 2 \
-		--software-deployment-method apptainer conda\
+		--software-deployment-method conda\
 		2>&1 | tee pipeline.txt
 
 

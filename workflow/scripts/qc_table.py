@@ -145,7 +145,7 @@ def read_rrna_ratio_table(path: str) -> pandas.DataFrame:
         header=0,
         index_col=0,
     )[["Ratio", "rRNA_counts"]]
-    rrna.columns = [["rRNA_Ratio", "rRNA_counts"]]
+    rrna.columns = ["rRNA_Ratio", "rRNA_counts"]
     logging.debug(rrna.head())
     return rrna
 
