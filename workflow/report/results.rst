@@ -58,6 +58,8 @@ results/
     │   └── Stats.csv.gz                        # (pseudo-)mapping statitstics
     └── Quantification
         ├── html_reports/                       # View counts in your web-browser
+        ├── PCA.png                             # PCA plot for axes 1 and 2
+        ├── Scree.png                           # Scree plot for the first 20 axes
         ├── Raw.genes.tsv                       # Raw gene abundance estimation
         ├── Raw.transcripts.tsv                 # Raw transcripts abundance estimation
         ├── TPM.genes.tsv                       # Normalized gene counts

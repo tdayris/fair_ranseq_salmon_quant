@@ -17,7 +17,7 @@ rule fair_rnaseq_salmon_quant_datavzrd_salmon_yaml:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/build_datavzrd_yaml.py"
+        "../scripts/fair_rnaseq_salmon_quant_build_datavzrd_yaml.py"
 
 
 rule fair_rnaseq_salmon_quant_datavzrd_salmon_render:

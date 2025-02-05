@@ -1,7 +1,19 @@
-# 1.2.4
+# 1.3.1
+
+## Features:
+
+* Snakemake-wrappers update to 5.6.0
+* fair_genome_indexer update to 3.9.5
+* fair_fastqc_multiqc update to 2.5.2
+
+# 1.3.0
+
+## Features:
 
 * fair_genome_indexer up to 3.9.2
 * fair_fastqc_multiqc up to 2.4.0
+* Include sample PCA and scree plot
+* Include rRNA and MitoRNA ratios
 
 # 1.2.3
 

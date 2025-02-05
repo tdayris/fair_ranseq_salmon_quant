@@ -22,13 +22,14 @@ snakefiles := \
 
 
 python_scripts := \
-	"../workflow/scripts/build_datavzrd_yaml.py" \
+	"../workflow/scripts/fair_rnaseq_salmon_quant_build_datavzrd_yaml.py" \
 	"../workflow/scripts/fair_rnaseq_salmon_quant_multiqc_config.py" \
-	"../workflow/scripts/in_house_pca.py" \
-	"../workflow/scripts/in_house_qc_mt_ribo_percents.py" \
-	"../workflow/scripts/merge_salmon_quant.py" \
-	"../workflow/scripts/qc_table.py" \
-	"../workflow/scripts/regenerate_genomes.py"
+	"../workflow/scripts/fair_rnaseq_salmon_quant_in_house_pca.py" \
+	"../workflow/scripts/fair_rnaseq_salmon_quant_in_house_qc_mt_ribo_percents.py" \
+	"../workflow/scripts/fair_rnaseq_salmon_quant_merge_salmon_quant.py" \
+	"../workflow/scripts/fair_rnaseq_salmon_quant_qc_table.py" \
+	"../workflow/scripts/fair_rnaseq_salmon_quant_in_house_pca.py" \
+	"../workflow/scripts/fair_rnaseq_salmon_quant_regenerate_genomes.py"
 
 .PHONY: all
 all: report.txt

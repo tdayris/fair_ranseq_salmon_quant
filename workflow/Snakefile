@@ -40,4 +40,4 @@ rule salmon_quant_target:
     conda:
         "envs/python.yaml"
     script:
-        "scripts/regenerate_genomes.py"
+        "scripts/fair_rnaseq_salmon_quant_regenerate_genomes.py"

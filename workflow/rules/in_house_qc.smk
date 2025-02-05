@@ -18,7 +18,7 @@ rule fair_rnaseq_salmon_quant_mito_rrna_percents:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/in_house_qc_mt_ribo_percents.py"
+        "../scripts/fair_rnaseq_salmon_quant_in_house_qc_mt_ribo_percents.py"
 
 
 rule fair_rnaseq_salmon_quant_qc_table:
@@ -47,4 +47,4 @@ rule fair_rnaseq_salmon_quant_qc_table:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/qc_table.py"
+        "../scripts/fair_rnaseq_salmon_quant_qc_table.py"

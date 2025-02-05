@@ -296,6 +296,7 @@ def get_rnaseq_salmon_quant_target(
         "quant": [],
         "datavzrd": [],
         "stats_csv": [],
+        "quant_pca": [],
     }
 
     sample_iterator = zip(
@@ -325,6 +326,10 @@ def get_rnaseq_salmon_quant_target(
             f"results/{genome_version}/Quantification/html_reports/TPM.genes"
         )
         results["stats_csv"].append(f"results/{genome_version}/QC/Stats.csv.gz")
+        results["quant_pca"].append(f"results/{genome_version}/Quantification/PCA.png")
+        results["quant_pca"].append(
+            f"results/{genome_version}/Quantification/Scree.png"
+        )
 
     results["multiqc"] = list(set(results["multiqc"]))
     return results

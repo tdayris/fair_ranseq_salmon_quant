@@ -34,7 +34,7 @@ rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts:
     conda:
         "../envs/python.yaml"
     script:
-        "../scripts/merge_salmon_quant.py"
+        "../scripts/fair_rnaseq_salmon_quant_merge_salmon_quant.py"
 
 
 use rule fair_rnaseq_salmon_quant_aggregate_salmon_gene_counts as fair_rnaseq_salmon_quant_aggregate_salmon_transcript_counts with:

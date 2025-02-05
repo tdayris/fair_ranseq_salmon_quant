@@ -1,36 +1,28 @@
-rule fair_rnaseq_salmon_quant_bioinfokit_pca:
+rule fair_rnaseq_salmon_quant_in_house_pca:
     input:
-        quant="results/{species}.{build}.{release}/Quantification/TPM.transcripts.tsv",
+        quant="results/{species}.{build}.{release}/Quantification/TPM.genes.tsv",
     output:
-        loadings_correlation=report(
-            "results/{species}.{build}.{release}/Quantification/PCA/Loadings_Correlation_heatmap.png",
-            caption="../report/loadings_correlation_heatmap.rst",
-            category="Quantification",
-            subcategory="PCA",
+        pca_yaml=temp(
+            "tmp/fair_rnaseq_salmon_quant_in_house_pca/{species}.{build}.{release}/pca.yaml"
         ),
-        scree_plot=report(
-            "results/{species}.{build}.{release}/Quantification/PCA/Screeplot.png",
-            caption="../report/screeplot.rst",
-            category="Quantification",
-            subcategory="PCA",
+        corr_yaml=temp(
+            "tmp/fair_rnaseq_salmon_quant_in_house_pca/{species}.{build}.{release}/correlation.yaml"
         ),
-        pca_2d=report(
-            "results/{species}.{build}.{release}/Quantification/PCA/PCA_2d.png",
-            caption="../report/pca_2d.rst",
+        pca_png=report(
+            "results/{species}.{build}.{release}/Quantification/PCA.png",
+            caption="../report/in_house_pca.rst",
             category="Quantification",
-            subcategory="PCA",
+            labels={
+                "species": "{species}.{build}.{release}",
+            },
         ),
-        pca_3d=report(
-            "results/{species}.{build}.{release}/Quantification/PCA/PCA_3d.png",
-            caption="../report/pca_3d.rst",
+        scree_png=report(
+            "results/{species}.{build}.{release}/Quantification/Scree.png",
+            caption="../report/in_house_scree.rst",
             category="Quantification",
-            subcategory="PCA",
-        ),
-        biplot=report(
-            "results/{species}.{build}.{release}/Quantification/PCA/Biplot.png",
-            caption="../report/biplot.rst",
-            category="Quantification",
-            subcategory="PCA",
+            labels={
+                "species": "{species}.{build}.{release}",
+            },
         ),
     threads: 1
     resources:
@@ -38,10 +30,10 @@ rule fair_rnaseq_salmon_quant_bioinfokit_pca:
         runtime=lambda wildcards, attempt: attempt * 15,
         tmpdir=tmp,
     log:
-        "logs/fair_rnaseq_salmon_quant_bioinfokit_pca/{species}.{build}.{release}/pca.log",
+        "logs/fair_rnaseq_salmon_quant_in_house_pca/{species}.{build}.{release}/pca.log",
     benchmark:
-        "benchmark/fair_rnaseq_salmon_quant_bioinfokit_pca/{species}.{build}.{release}/pca.tsv"
+        "benchmark/fair_rnaseq_salmon_quant_in_house_pca/{species}.{build}.{release}/pca.tsv"
     conda:
-        "../envs/bioinfokit.yaml"
+        "../envs/python.yaml"
     script:
-        "../scripts/bioinfokit_pca.py"
+        "../scripts/fair_rnaseq_salmon_quant_in_house_pca.py"
